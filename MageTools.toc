@@ -1,0 +1,13 @@
+## Interface: 20505
+## Title: MageTools
+## Notes: Mage utility addon — portals, conjure tracking, trade helper
+## Author: russell
+## SavedVariablesPerCharacter: MageToolsDB
+## OptionalDeps: Masque
+
+Core.lua
+Data.lua
+MasqueHelper.lua
+PopupMenu.lua
+ConjureManager.lua
+TradeHelper.lua
