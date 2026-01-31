@@ -18,12 +18,13 @@ function TH:MatchKeyword(msg)
     msg = strlower(msg)
     local matched = {}
     for _, keyword in ipairs(MageToolsDB.whisperKeywords) do
-        if strfind(msg, strlower(keyword)) then
-            if keyword == "food" then
+        local lk = strlower(keyword)
+        if strfind(msg, lk) then
+            if lk == "food" then
                 matched.food = true
-            elseif keyword == "water" then
+            elseif lk == "water" then
                 matched.water = true
-            elseif keyword == "mage" then
+            elseif lk == "mage" then
                 matched.food = true
                 matched.water = true
             end
@@ -171,10 +172,8 @@ function TH:CreateQueueFrame()
 
         row:SetScript("OnClick", function()
             if queue[i] then
-                -- Target player and initiate trade
                 pendingTrade = queue[i]
-                TargetByName(queue[i].name, true)
-                InitiateTrade("target")
+                print("|cff69ccf0MageTools|r Target " .. queue[i].name .. " and open trade.")
             end
         end)
 
@@ -226,11 +225,9 @@ function TH:OnEvent(event, ...)
         if pendingTrade then
             self:PlaceItemsInTrade(pendingTrade.request)
         end
-    elseif event == "TRADE_ACCEPT_UPDATE" then
-        -- Nothing needed here, handled on close
     elseif event == "UI_INFO_MESSAGE" then
         local _, msg = ...
-        if msg and strfind(msg, "Trade complete") then
+        if msg == ERR_TRADE_COMPLETE then
             -- Find and remove the served player
             if pendingTrade then
                 for i, entry in ipairs(queue) do
@@ -243,23 +240,8 @@ function TH:OnEvent(event, ...)
             end
         end
     elseif event == "TRADE_CLOSED" then
-        -- Reset pending if trade cancelled
-        -- (Don't remove from queue — they still need items)
-    elseif event == "GROUP_ROSTER_UPDATE" or event == "PARTY_MEMBERS_CHANGED" then
-        -- Remove offline players from queue
-        local toRemove = {}
-        for i, entry in ipairs(queue) do
-            if not UnitIsConnected(entry.name) then
-                tinsert(toRemove, i)
-            end
-        end
-        for j = #toRemove, 1, -1 do
-            tremove(queue, toRemove[j])
-        end
-        if #toRemove > 0 then
-            self:UpdateQueueDisplay()
-        end
+        pendingTrade = nil
     end
 end
 
-MT:RegisterEvents("CHAT_MSG_WHISPER", "TRADE_SHOW", "TRADE_CLOSED", "UI_INFO_MESSAGE", "PARTY_MEMBERS_CHANGED")
+MT:RegisterEvents("CHAT_MSG_WHISPER", "TRADE_SHOW", "TRADE_CLOSED", "UI_INFO_MESSAGE")

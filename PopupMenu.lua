@@ -122,11 +122,11 @@ function PM:CreateSpellRow(spells, yOffset, prefix)
         btn:SetPoint("TOPLEFT", popup, "TOPLEFT", x, y)
 
         btn:SetAttribute("type", "spell")
-        btn:SetAttribute("spell", spell.spellID)
+        local spellName, _, icon = GetSpellInfo(spell.spellID)
+        btn:SetAttribute("spell", spellName)
         btn:RegisterForClicks("AnyUp", "AnyDown")
 
         -- Icon
-        local spellName, _, icon = GetSpellInfo(spell.spellID)
         local iconTex = btn:CreateTexture(nil, "BACKGROUND")
         iconTex:SetAllPoints()
         iconTex:SetTexture(icon)
@@ -196,7 +196,7 @@ function PM:CreateItemCounters(yOffset)
         elseif cat.type == "water" then itemList = MT.CONJURED_WATER
         else itemList = MT.MANA_GEMS end
 
-        local _, _, iconPath = GetItemInfo(itemList[1])
+        local iconPath = GetItemIcon(itemList[1])
         local iconTex = btn:CreateTexture(nil, "BACKGROUND")
         iconTex:SetAllPoints()
         if iconPath then
