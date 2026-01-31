@@ -1,0 +1,5 @@
+<Bindings>
+    <Binding name="MAGETOOLS_POPUP" header="MAGETOOLS">
+        MageTools_TogglePopup()
+    </Binding>
+</Bindings>
