@@ -87,15 +87,14 @@ function TH:FindConjuredItem(itemType)
     -- Find a full stack first (20), otherwise any stack
     local bestBag, bestSlot, bestCount = nil, nil, 0
     for bag = 0, NUM_BAG_SLOTS do
-        local numSlots = GetContainerNumSlots(bag)
+        local numSlots = C_Container.GetContainerNumSlots(bag)
         for slot = 1, numSlots do
-            local itemID = GetContainerItemID(bag, slot)
-            if itemID then
+            local info = C_Container.GetContainerItemInfo(bag, slot)
+            if info and info.itemID then
                 for _, validID in ipairs(itemList) do
-                    if itemID == validID then
-                        local _, itemCount = GetContainerItemInfo(bag, slot)
-                        if itemCount and itemCount > bestCount then
-                            bestBag, bestSlot, bestCount = bag, slot, itemCount
+                    if info.itemID == validID then
+                        if info.stackCount and info.stackCount > bestCount then
+                            bestBag, bestSlot, bestCount = bag, slot, info.stackCount
                         end
                     end
                 end
@@ -110,7 +109,7 @@ function TH:PlaceItemsInTrade(request)
     if request == "food" or request == "both" then
         local bag, slot = self:FindConjuredItem("food")
         if bag then
-            PickupContainerItem(bag, slot)
+            C_Container.PickupContainerItem(bag, slot)
             ClickTradeButton(tradeSlot)
             tradeSlot = tradeSlot + 1
         end
@@ -118,7 +117,7 @@ function TH:PlaceItemsInTrade(request)
     if request == "water" or request == "both" then
         local bag, slot = self:FindConjuredItem("water")
         if bag then
-            PickupContainerItem(bag, slot)
+            C_Container.PickupContainerItem(bag, slot)
             ClickTradeButton(tradeSlot)
         end
     end
@@ -126,7 +125,7 @@ end
 
 -- Queue Frame
 function TH:CreateQueueFrame()
-    queueFrame = CreateFrame("Frame", "MageToolsQueue", UIParent)
+    queueFrame = CreateFrame("Frame", "MageToolsQueue", UIParent, "BackdropTemplate")
     queueFrame:SetSize(200, 40)
     queueFrame:SetPoint("RIGHT", UIParent, "RIGHT", -20, 0)
     queueFrame:SetFrameStrata("MEDIUM")

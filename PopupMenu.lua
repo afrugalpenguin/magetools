@@ -23,12 +23,11 @@ function MageTools_TogglePopup()
 end
 
 function PM:Init()
-    MT.Masque:Init()
     self:CreatePopup()
 end
 
 function PM:CreatePopup()
-    popup = CreateFrame("Frame", "MageToolsPopup", UIParent)
+    popup = CreateFrame("Frame", "MageToolsPopup", UIParent, "BackdropTemplate")
     popup:SetFrameStrata("DIALOG")
     popup:SetClampedToScreen(true)
     popup:Hide()
@@ -43,9 +42,7 @@ function PM:CreatePopup()
     -- Background
     popup:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 32, edgeSize = 16,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+        tile = true, tileSize = 16,
     })
     popup:SetBackdropColor(0, 0, 0, 0.85)
 
@@ -126,19 +123,28 @@ function PM:CreateSpellRow(spells, yOffset, prefix)
         btn:SetAttribute("spell", spellName)
         btn:RegisterForClicks("AnyUp", "AnyDown")
 
+        -- Clear any template-injected normal texture
+        local tmplNormal = btn:GetNormalTexture()
+        if tmplNormal then
+            tmplNormal:SetTexture(nil)
+            tmplNormal:Hide()
+        end
+
         -- Icon
         local iconTex = btn:CreateTexture(nil, "BACKGROUND")
         iconTex:SetAllPoints()
         iconTex:SetTexture(icon)
         btn.icon = iconTex
 
-        -- Normal/highlight textures for Masque compatibility
-        local normalTex = btn:CreateTexture(nil, "OVERLAY")
-        normalTex:SetAllPoints()
-        normalTex:SetTexture("Interface\\Buttons\\UI-Quickslot2")
-        btn:SetNormalTexture(normalTex)
+        -- Masque skinning
+        local normalTex, highlightTex
+        if MT.Masque:IsEnabled() then
+            normalTex = btn:CreateTexture(nil, "OVERLAY")
+            normalTex:SetAllPoints()
+            btn:SetNormalTexture(normalTex)
+        end
 
-        local highlightTex = btn:CreateTexture(nil, "HIGHLIGHT")
+        highlightTex = btn:CreateTexture(nil, "HIGHLIGHT")
         highlightTex:SetAllPoints()
         highlightTex:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
         highlightTex:SetBlendMode("ADD")
@@ -204,10 +210,12 @@ function PM:CreateItemCounters(yOffset)
         end
         btn.icon = iconTex
 
-        local normalTex = btn:CreateTexture(nil, "OVERLAY")
-        normalTex:SetAllPoints()
-        normalTex:SetTexture("Interface\\Buttons\\UI-Quickslot2")
-        btn:SetNormalTexture(normalTex)
+        local normalTex
+        if MT.Masque:IsEnabled() then
+            normalTex = btn:CreateTexture(nil, "OVERLAY")
+            normalTex:SetAllPoints()
+            btn:SetNormalTexture(normalTex)
+        end
 
         -- Count text
         local countText = btn:CreateFontString(nil, "OVERLAY", "NumberFontNormal")

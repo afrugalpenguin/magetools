@@ -40,6 +40,7 @@ frame:SetScript("OnEvent", function(self, event, ...)
         local addon = ...
         if addon == "MageTools" then
             MageTools:InitDB()
+            MageTools.Masque:Init()
             for name, mod in pairs(MageTools.modules) do
                 if mod.Init then
                     mod:Init()
@@ -63,8 +64,8 @@ function MageTools:RegisterEvents(...)
 end
 
 -- Slash commands
-SLASH_MAGETOOLS1 = "/mt"
-SLASH_MAGETOOLS2 = "/magetools"
+SLASH_MAGETOOLS1 = "/magetools"
+SLASH_MAGETOOLS2 = "/mgt"
 SlashCmdList["MAGETOOLS"] = function(msg)
     local cmd = strlower(strtrim(msg))
     if cmd == "hud" then
@@ -84,9 +85,9 @@ SlashCmdList["MAGETOOLS"] = function(msg)
         print("  Keywords: " .. table.concat(MageToolsDB.whisperKeywords, ", "))
     else
         print("|cff69ccf0MageTools|r commands:")
-        print("  /mt hud - Toggle HUD")
-        print("  /mt conjure - Conjure session")
-        print("  /mt queue - Toggle trade queue")
-        print("  /mt config - Show config")
+        print("  /mgt hud - Toggle HUD")
+        print("  /mgt conjure - Conjure session")
+        print("  /mgt queue - Toggle trade queue")
+        print("  /mgt config - Show config")
     end
 end

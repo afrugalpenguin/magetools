@@ -1,7 +1,7 @@
 ## Interface: 20505
 ## Title: MageTools
 ## Notes: Mage utility addon — portals, conjure tracking, trade helper
-## Author: russell
+## Author: FrugalPenguin
 ## SavedVariablesPerCharacter: MageToolsDB
 ## OptionalDeps: Masque
 

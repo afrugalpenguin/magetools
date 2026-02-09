@@ -26,14 +26,13 @@ function CM:ScanBags()
     counts.water = 0
     counts.gem = 0
     for bag = 0, NUM_BAG_SLOTS do
-        local numSlots = GetContainerNumSlots(bag)
+        local numSlots = C_Container.GetContainerNumSlots(bag)
         for slot = 1, numSlots do
-            local itemID = GetContainerItemID(bag, slot)
-            if itemID then
-                local itemType = MT.CONJURED_ITEM_SET[itemID]
+            local info = C_Container.GetContainerItemInfo(bag, slot)
+            if info and info.itemID then
+                local itemType = MT.CONJURED_ITEM_SET[info.itemID]
                 if itemType then
-                    local _, itemCount = GetContainerItemInfo(bag, slot)
-                    counts[itemType] = counts[itemType] + (itemCount or 0)
+                    counts[itemType] = counts[itemType] + (info.stackCount or 0)
                 end
             end
         end
@@ -66,7 +65,7 @@ end
 
 -- HUD
 function CM:CreateHUD()
-    hudFrame = CreateFrame("Frame", "MageToolsHUD", UIParent)
+    hudFrame = CreateFrame("Frame", "MageToolsHUD", UIParent, "BackdropTemplate")
     hudFrame:SetSize((BUTTON_SIZE * 3) + 16, BUTTON_SIZE + 16)
     hudFrame:SetPoint(
         MageToolsDB.hudPoint or "CENTER",
@@ -89,13 +88,7 @@ function CM:CreateHUD()
         MageToolsDB.hudY = y
     end)
 
-    hudFrame:SetBackdrop({
-        bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
-        tile = true, tileSize = 16, edgeSize = 12,
-        insets = { left = 2, right = 2, top = 2, bottom = 2 },
-    })
-    hudFrame:SetBackdropColor(0, 0, 0, 0.6)
+    hudFrame:SetBackdrop(nil)
 
     local categories = {
         { type = "gem",   items = MT.MANA_GEMS },
@@ -114,10 +107,12 @@ function CM:CreateHUD()
         if iconPath then iconTex:SetTexture(iconPath) end
         btn.icon = iconTex
 
-        local normalTex = btn:CreateTexture(nil, "OVERLAY")
-        normalTex:SetAllPoints()
-        normalTex:SetTexture("Interface\\Buttons\\UI-Quickslot2")
-        btn:SetNormalTexture(normalTex)
+        local normalTex
+        if MT.Masque:IsEnabled() then
+            normalTex = btn:CreateTexture(nil, "OVERLAY")
+            normalTex:SetAllPoints()
+            btn:SetNormalTexture(normalTex)
+        end
 
         local countText = btn:CreateFontString(nil, "OVERLAY", "NumberFontNormalLarge")
         countText:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
@@ -148,7 +143,7 @@ end
 
 -- Conjure Session
 function CM:CreateConjureSession()
-    sessionFrame = CreateFrame("Frame", "MageToolsConjureSession", UIParent)
+    sessionFrame = CreateFrame("Frame", "MageToolsConjureSession", UIParent, "BackdropTemplate")
     sessionFrame:SetSize(220, 180)
     sessionFrame:SetPoint("CENTER")
     sessionFrame:SetFrameStrata("HIGH")
@@ -164,9 +159,9 @@ function CM:CreateConjureSession()
 
     sessionFrame:SetBackdrop({
         bgFile = "Interface\\DialogFrame\\UI-DialogBox-Background",
-        edgeFile = "Interface\\DialogFrame\\UI-DialogBox-Border",
-        tile = true, tileSize = 32, edgeSize = 16,
-        insets = { left = 4, right = 4, top = 4, bottom = 4 },
+        edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+        tile = true, tileSize = 16, edgeSize = 12,
+        insets = { left = 2, right = 2, top = 2, bottom = 2 },
     })
     sessionFrame:SetBackdropColor(0, 0, 0, 0.9)
 
@@ -202,6 +197,8 @@ function CM:CreateConjureSession()
     foodBtn:SetAttribute("type", "spell")
     foodBtn:SetAttribute("spell", GetSpellInfo(MT.CONJURE_FOOD_SPELL))
     foodBtn:RegisterForClicks("AnyUp", "AnyDown")
+    local foodNormal = foodBtn:GetNormalTexture()
+    if foodNormal then foodNormal:SetTexture(nil); foodNormal:Hide() end
     foodBtn:SetNormalFontObject("GameFontNormal")
     foodBtn:SetText("Food")
     local foodBtnTex = foodBtn:CreateTexture(nil, "BACKGROUND")
@@ -217,6 +214,8 @@ function CM:CreateConjureSession()
     waterBtn:SetAttribute("type", "spell")
     waterBtn:SetAttribute("spell", GetSpellInfo(MT.CONJURE_WATER_SPELL))
     waterBtn:RegisterForClicks("AnyUp", "AnyDown")
+    local waterNormal = waterBtn:GetNormalTexture()
+    if waterNormal then waterNormal:SetTexture(nil); waterNormal:Hide() end
     waterBtn:SetNormalFontObject("GameFontNormal")
     waterBtn:SetText("Water")
     local waterBtnTex = waterBtn:CreateTexture(nil, "BACKGROUND")
@@ -228,9 +227,9 @@ end
 
 function CM:GetGroupSize()
     if IsInRaid() then
-        return GetNumRaidMembers()
+        return GetNumGroupMembers()
     elseif IsInGroup() then
-        return GetNumPartyMembers() + 1
+        return GetNumGroupMembers()
     end
     return 1
 end

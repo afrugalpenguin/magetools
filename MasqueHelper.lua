@@ -19,6 +19,10 @@ function MT.Masque:GetGroup(name)
     return groups[name]
 end
 
+function MT.Masque:IsEnabled()
+    return MSQ ~= nil
+end
+
 function MT.Masque:AddButton(groupName, button, data)
     local group = self:GetGroup(groupName)
     if group then
