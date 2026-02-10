@@ -1,5 +1,0 @@
-<Bindings>
-    <Binding name="MAGETOOLS_POPUP" category="ADDONS">
-        MageTools_TogglePopup()
-    </Binding>
-</Bindings>

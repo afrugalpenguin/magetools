@@ -19,7 +19,7 @@ jobs:
         run: |
           rm -rf MageTools magetools
           mkdir MageTools
-          cp Core.lua WhatsNew.lua Options.lua Data.lua MasqueHelper.lua PopupMenu.lua ConjureManager.lua TradeHelper.lua Bindings.xml MageTools.toc CHANGELOG.md MageTools/
+          cp Core.lua WhatsNew.lua Options.lua Data.lua MasqueHelper.lua PopupMenu.lua ConjureManager.lua TradeHelper.lua MageTools.toc CHANGELOG.md MageTools/
           sed -i "s/@project-version@/${{ github.ref_name }}/g" MageTools/MageTools.toc
           zip -r "MageTools-${{ github.ref_name }}.zip" MageTools/
 
