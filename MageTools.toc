@@ -6,6 +6,7 @@
 ## SavedVariablesPerCharacter: MageToolsDB
 ## OptionalDeps: Masque
 
+Bindings.xml
 Core.lua
 WhatsNew.lua
 Options.lua

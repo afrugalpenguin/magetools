@@ -102,6 +102,71 @@ local function CreateSlider(parent, label, dbKey, minVal, maxVal, step, yOffset,
     return yOffset - 42
 end
 
+local function CreateKeybind(parent, label, bindingName, yOffset)
+    local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    text:SetPoint("TOPLEFT", parent, "TOPLEFT", 12, yOffset)
+    text:SetText(label)
+
+    local btn = CreateFrame("Button", nil, parent, "BackdropTemplate")
+    btn:SetSize(120, 22)
+    btn:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -12, yOffset + 2)
+    btn:SetBackdrop({
+        bgFile = "Interface\\BUTTONS\\WHITE8X8",
+        edgeFile = "Interface\\BUTTONS\\WHITE8X8",
+        edgeSize = 1,
+    })
+    btn:SetBackdropColor(0.15, 0.15, 0.15, 1)
+    btn:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+
+    local btnText = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    btnText:SetPoint("CENTER")
+
+    local function UpdateLabel()
+        local key = GetBindingKey(bindingName)
+        btnText:SetText(key or "|cff666666Not bound|r")
+    end
+    UpdateLabel()
+
+    local waiting = false
+
+    btn:SetScript("OnClick", function(self, click)
+        if click == "RightButton" then
+            -- Unbind on right-click
+            local key = GetBindingKey(bindingName)
+            if key then
+                SetBinding(key, nil)
+                SaveBindings(GetCurrentBindingSet())
+            end
+            UpdateLabel()
+            return
+        end
+        if waiting then return end
+        waiting = true
+        btnText:SetText("|cffFFD200Press a key...|r")
+        self:SetBackdropBorderColor(ACCENT_COLOR[1], ACCENT_COLOR[2], ACCENT_COLOR[3], 1)
+        self:SetScript("OnKeyDown", function(self, key)
+            if key == "ESCAPE" then
+                -- Cancel
+            else
+                -- Clear any old binding for this action
+                local oldKey = GetBindingKey(bindingName)
+                if oldKey then SetBinding(oldKey, nil) end
+                SetBinding(key, bindingName)
+                SaveBindings(GetCurrentBindingSet())
+            end
+            waiting = false
+            self:SetScript("OnKeyDown", nil)
+            self:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+            self:EnableKeyboard(false)
+            UpdateLabel()
+        end)
+        self:EnableKeyboard(true)
+    end)
+    btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+    return yOffset - 28
+end
+
 local function CreateKeywordEditor(parent, yOffset)
     local headerY = CreateHeader(parent, "Whisper Keywords", yOffset)
     yOffset = headerY
@@ -229,11 +294,7 @@ local function BuildGeneralContent(parent)
     -- Popup Menu section
     y = CreateHeader(parent, "Popup Menu", y - 6)
 
-    local keybindHint = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmall")
-    keybindHint:SetPoint("TOPLEFT", parent, "TOPLEFT", 12, y)
-    keybindHint:SetText("|cff888888Keybind: set via Escape > Key Bindings > MageTools|r")
-    y = y - 16
-
+    y = CreateKeybind(parent, "Toggle Keybind", "MAGETOOLS_POPUP", y)
     y = CreateSlider(parent, "Buttons Per Row", "popupColumns", 3, 8, 1, y, function()
         local pm = MT.modules["PopupMenu"]
         if pm and pm.Rebuild then pm:Rebuild() end
