@@ -4,9 +4,10 @@ MT:RegisterModule("PopupMenu", PM)
 
 local popup = nil
 local buttons = {}
+local labels = {}
 local BUTTON_PADDING = 4
 local BLOCK_GAP = 6
-local BLOCK_COLS = 4
+local BLOCK_COLS = 99  -- no wrapping, each category stays on one row
 
 -- Scan the spellbook for the highest rank of a spell by name
 local function FindSpellInBook(targetName)
@@ -178,7 +179,8 @@ local function CreateSpellButton(spell, prefix, index)
 
     -- Icon
     local iconTex = btn:CreateTexture(nil, "BACKGROUND")
-    iconTex:SetAllPoints()
+    iconTex:SetPoint("TOPLEFT", 1, -1)
+    iconTex:SetPoint("BOTTOMRIGHT", -1, 1)
     iconTex:SetTexture(icon)
     btn.icon = iconTex
 
@@ -188,6 +190,12 @@ local function CreateSpellButton(spell, prefix, index)
         normalTex = btn:CreateTexture(nil, "OVERLAY")
         normalTex:SetAllPoints()
         btn:SetNormalTexture(normalTex)
+    else
+        -- Thin border around icon
+        local border = btn:CreateTexture(nil, "ARTWORK")
+        border:SetAllPoints()
+        border:SetColorTexture(0, 0, 0, 1)
+        -- Icon is inset by 1px so the black shows as a border
     end
 
     highlightTex = btn:CreateTexture(nil, "HIGHLIGHT")
@@ -232,9 +240,11 @@ local function CreateSpellButton(spell, prefix, index)
 end
 
 function PM:BuildButtons()
-    -- Clear old buttons
+    -- Clear old buttons and labels
     for _, btn in ipairs(buttons) do btn:Hide() end
     wipe(buttons)
+    for _, lbl in ipairs(labels) do lbl:Hide() end
+    wipe(labels)
 
     local playerFaction = UnitFactionGroup("player")
     local knownTeleports = {}
@@ -286,16 +296,18 @@ function PM:BuildButtons()
     -- X layout: four blocks around cursor center
     -- TL = buffs, TR = conjure, BL = teleports, BR = portals
     local quadrants = {
-        { spells = buffSpells,      prefix = "Buff"     },  -- 1: top-left
-        { spells = conjureSpells,   prefix = "Conjure"  },  -- 2: top-right
-        { spells = knownTeleports,  prefix = "Teleport" },  -- 3: bottom-left
-        { spells = knownPortals,    prefix = "Portal"   },  -- 4: bottom-right
+        { spells = buffSpells,      prefix = "Buff",     label = "Buffs"     },  -- 1: top-left
+        { spells = conjureSpells,   prefix = "Conjure",  label = "Conjure"   },  -- 2: top-right
+        { spells = knownTeleports,  prefix = "Teleport", label = "Teleports" },  -- 3: bottom-left
+        { spells = knownPortals,    prefix = "Portal",   label = "Portals"   },  -- 4: bottom-right
     }
 
     local btnSize = MageToolsDB.popupButtonSize
     local spacing = btnSize + BUTTON_PADDING
     local maxAbsX = 0
     local maxAbsY = 0
+
+    local LABEL_GAP = 2
 
     for qIdx, q in ipairs(quadrants) do
         if #q.spells > 0 then
@@ -338,14 +350,36 @@ function PM:BuildButtons()
                     row = row + 1
                 end
             end
+
+            -- Quadrant label
+            local lbl = popup:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+            lbl:SetText(q.label)
+            lbl:SetTextColor(0.41, 0.80, 0.94, 0.8)
+
+            if qIdx == 1 then       -- top-left: label above block, right-aligned
+                lbl:SetPoint("BOTTOMRIGHT", popup, "CENTER", -BLOCK_GAP, BLOCK_GAP + blockH + LABEL_GAP)
+            elseif qIdx == 2 then   -- top-right: label above block, left-aligned
+                lbl:SetPoint("BOTTOMLEFT", popup, "CENTER", BLOCK_GAP, BLOCK_GAP + blockH + LABEL_GAP)
+            elseif qIdx == 3 then   -- bottom-left: label below block, right-aligned
+                lbl:SetPoint("TOPRIGHT", popup, "CENTER", -BLOCK_GAP, -BLOCK_GAP - blockH - LABEL_GAP)
+            else                    -- bottom-right: label below block, left-aligned
+                lbl:SetPoint("TOPLEFT", popup, "CENTER", BLOCK_GAP, -BLOCK_GAP - blockH - LABEL_GAP)
+            end
+
+            tinsert(labels, lbl)
+
+            -- Account for label in popup bounds
+            local labelEdgeY = BLOCK_GAP + blockH + LABEL_GAP + 12
+            if labelEdgeY > maxAbsY then maxAbsY = labelEdgeY end
         end
     end
 
     MT.Masque:ReSkin("Popup")
 
-    -- Size popup to contain all buttons
+    -- Size popup to contain all buttons, labels, and backdrop padding
+    local EDGE_PADDING = 8
     if maxAbsX > 0 and maxAbsY > 0 then
-        popup:SetSize((maxAbsX + BUTTON_PADDING) * 2, (maxAbsY + BUTTON_PADDING) * 2)
+        popup:SetSize((maxAbsX + EDGE_PADDING) * 2, (maxAbsY + EDGE_PADDING) * 2)
     else
         popup:SetSize(1, 1)
     end
