@@ -10,8 +10,9 @@ local BORDER_COLOR = { 0.4, 0.6, 0.9, 1 }
 local HEADER_COLOR = "|cffFFD200"
 local ACCENT_COLOR = { 0.4, 0.6, 0.9 }
 
-local SIDEBAR_WIDTH = 120
-local FRAME_WIDTH = 500
+local TAB_HEIGHT = 24
+local TAB_PAD = 4
+local FRAME_WIDTH = 420
 local FRAME_HEIGHT = 400
 
 --------------------------------------------------------------------------------
@@ -46,8 +47,9 @@ local function CreateCheckbox(parent, label, dbKey, yOffset, onChange)
     end
     cb:SetChecked(MageToolsDB[dbKey])
     cb:SetScript("OnClick", function(self)
-        MageToolsDB[dbKey] = self:GetChecked()
-        if onChange then onChange(self:GetChecked()) end
+        local checked = not not self:GetChecked()
+        MageToolsDB[dbKey] = checked
+        if onChange then onChange(checked) end
     end)
     return yOffset - 28
 end
@@ -400,44 +402,41 @@ local categoryDefs = {
     { name = "Appearance",   builder = BuildAppearanceContent },
 }
 
--- Builds the sidebar + scrollable content layout into any parent frame.
--- topOffset: Y offset from parent top where the layout begins.
+-- Builds horizontal tabs + scrollable content layout into any parent frame.
+-- topOffset: Y offset from parent top where the tabs begin.
 -- contentWidth (optional): explicit width for scroll children.
 -- Returns a layout controller table.
 local function BuildOptionsLayout(parent, topOffset, contentWidth)
     local layout = {
-        categories = {},
+        tabs = {},
         contentFrames = {},
         activeCategory = nil,
     }
 
-    -- Sidebar
-    local sidebar = CreateFrame("Frame", nil, parent, "BackdropTemplate")
-    sidebar:SetPoint("TOPLEFT", parent, "TOPLEFT", 1, topOffset)
-    sidebar:SetPoint("BOTTOMLEFT", parent, "BOTTOMLEFT", 1, 1)
-    sidebar:SetWidth(SIDEBAR_WIDTH)
-
-    -- Sidebar separator line
+    -- Tab bar separator line (below tabs)
+    local tabBarY = topOffset - TAB_HEIGHT - TAB_PAD
     local sepLine = parent:CreateTexture(nil, "ARTWORK")
-    sepLine:SetWidth(1)
-    sepLine:SetPoint("TOPLEFT", sidebar, "TOPRIGHT", 0, 0)
-    sepLine:SetPoint("BOTTOMLEFT", sidebar, "BOTTOMRIGHT", 0, 0)
+    sepLine:SetHeight(1)
+    sepLine:SetPoint("TOPLEFT", parent, "TOPLEFT", 8, tabBarY)
+    sepLine:SetPoint("TOPRIGHT", parent, "TOPRIGHT", -8, tabBarY)
     sepLine:SetColorTexture(ACCENT_COLOR[1], ACCENT_COLOR[2], ACCENT_COLOR[3], 0.3)
 
-    -- Content area with scroll support
+    -- Content area with scroll support (below tab bar)
     local contentArea = CreateFrame("ScrollFrame", nil, parent, "UIPanelScrollFrameTemplate")
-    contentArea:SetPoint("TOPLEFT", parent, "TOPLEFT", SIDEBAR_WIDTH + 6, topOffset - 2)
+    contentArea:SetPoint("TOPLEFT", parent, "TOPLEFT", 6, tabBarY - 4)
     contentArea:SetPoint("BOTTOMRIGHT", parent, "BOTTOMRIGHT", -26, 6)
 
     local function ShowCategory(index)
         if layout.activeCategory == index then return end
         layout.activeCategory = index
 
-        for i, catBtn in ipairs(layout.categories) do
+        for i, tab in ipairs(layout.tabs) do
             if i == index then
-                catBtn:SetBackdropColor(ACCENT_COLOR[1], ACCENT_COLOR[2], ACCENT_COLOR[3], 0.3)
+                tab:SetBackdropColor(ACCENT_COLOR[1], ACCENT_COLOR[2], ACCENT_COLOR[3], 0.3)
+                tab:SetBackdropBorderColor(ACCENT_COLOR[1], ACCENT_COLOR[2], ACCENT_COLOR[3], 0.6)
             else
-                catBtn:SetBackdropColor(0, 0, 0, 0)
+                tab:SetBackdropColor(0.1, 0.1, 0.14, 0.8)
+                tab:SetBackdropBorderColor(0.25, 0.25, 0.3, 0.8)
             end
         end
 
@@ -451,40 +450,47 @@ local function BuildOptionsLayout(parent, topOffset, contentWidth)
         end
     end
 
-    -- Create category buttons and content frames
+    -- Create tab buttons and content frames
+    local tabX = 8
     for i, def in ipairs(categoryDefs) do
-        local catBtn = CreateFrame("Button", nil, sidebar, "BackdropTemplate")
-        catBtn:SetSize(SIDEBAR_WIDTH - 2, 28)
-        catBtn:SetPoint("TOPLEFT", sidebar, "TOPLEFT", 1, -((i - 1) * 30) - 4)
-        catBtn:SetBackdrop({
+        local tab = CreateFrame("Button", nil, parent, "BackdropTemplate")
+        tab:SetHeight(TAB_HEIGHT)
+        tab:SetBackdrop({
             bgFile = "Interface\\BUTTONS\\WHITE8X8",
+            edgeFile = "Interface\\BUTTONS\\WHITE8X8",
+            edgeSize = 1,
         })
-        catBtn:SetBackdropColor(0, 0, 0, 0)
 
-        local catLabel = catBtn:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-        catLabel:SetPoint("LEFT", 10, 0)
-        catLabel:SetText(def.name)
-        catBtn.label = catLabel
+        local tabLabel = tab:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+        tabLabel:SetPoint("CENTER", 0, 0)
+        tabLabel:SetText(def.name)
+        tab.label = tabLabel
 
-        catBtn:SetScript("OnEnter", function(self)
+        -- Size tab to fit text
+        local textWidth = tabLabel:GetStringWidth()
+        tab:SetWidth(textWidth + 20)
+        tab:SetPoint("TOPLEFT", parent, "TOPLEFT", tabX, topOffset)
+        tabX = tabX + textWidth + 20 + TAB_PAD
+
+        tab:SetScript("OnEnter", function(self)
             if layout.activeCategory ~= i then
                 self:SetBackdropColor(ACCENT_COLOR[1], ACCENT_COLOR[2], ACCENT_COLOR[3], 0.15)
             end
         end)
-        catBtn:SetScript("OnLeave", function(self)
+        tab:SetScript("OnLeave", function(self)
             if layout.activeCategory ~= i then
-                self:SetBackdropColor(0, 0, 0, 0)
+                self:SetBackdropColor(0.1, 0.1, 0.14, 0.8)
             end
         end)
-        catBtn:SetScript("OnClick", function()
+        tab:SetScript("OnClick", function()
             ShowCategory(i)
         end)
 
-        tinsert(layout.categories, catBtn)
+        tinsert(layout.tabs, tab)
 
         -- Content frame (scrollchild)
         local content = CreateFrame("Frame", nil, contentArea)
-        local w = contentWidth or parent:GetWidth() - SIDEBAR_WIDTH - 36
+        local w = contentWidth or parent:GetWidth() - 36
         if w < 100 then w = 340 end
         content:SetWidth(w)
         content:SetHeight(FRAME_HEIGHT)
@@ -545,7 +551,7 @@ local function CreateOptionsFrame()
     closeBtn:SetPoint("TOPRIGHT", f, "TOPRIGHT", -2, -2)
 
     -- Build the shared layout inside this frame
-    BuildOptionsLayout(f, -36, FRAME_WIDTH - SIDEBAR_WIDTH - 36)
+    BuildOptionsLayout(f, -36, FRAME_WIDTH - 36)
 
     return f
 end

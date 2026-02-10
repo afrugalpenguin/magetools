@@ -152,6 +152,29 @@ function TH:CreateQueueFrame()
     title:SetText("|cff69ccf0Trade Queue|r")
     queueFrame.title = title
 
+    -- Conjure session shortcut button
+    local conjBtn = CreateFrame("Button", nil, queueFrame)
+    conjBtn:SetSize(14, 14)
+    conjBtn:SetPoint("TOPRIGHT", queueFrame, "TOPRIGHT", -6, -4)
+    local conjIcon = conjBtn:CreateTexture(nil, "ARTWORK")
+    conjIcon:SetAllPoints()
+    conjIcon:SetTexture("Interface\\Icons\\INV_Misc_Gem_Emerald_02")
+    conjIcon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+    local conjHL = conjBtn:CreateTexture(nil, "HIGHLIGHT")
+    conjHL:SetAllPoints()
+    conjHL:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
+    conjHL:SetBlendMode("ADD")
+    conjBtn:SetScript("OnClick", function()
+        local cm = MT.modules["ConjureManager"]
+        if cm then cm:ToggleConjureSession() end
+    end)
+    conjBtn:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+        GameTooltip:SetText("Open Conjure Session")
+        GameTooltip:Show()
+    end)
+    conjBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+
     -- Create row buttons
     for i = 1, MageToolsDB.maxQueueDisplay do
         local row = CreateFrame("Button", "MageToolsQueueRow" .. i, queueFrame)
