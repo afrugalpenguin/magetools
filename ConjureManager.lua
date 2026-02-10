@@ -59,7 +59,12 @@ end
 function CM:CreateHUD()
     hudFrame = CreateFrame("Frame", "MageToolsHUD", UIParent, "BackdropTemplate")
     local btnSize = MageToolsDB.hudButtonSize
-    hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
+    local vertical = MageToolsDB.hudVertical
+    if vertical then
+        hudFrame:SetSize(btnSize + 16, (btnSize * 3) + 16)
+    else
+        hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
+    end
     hudFrame:SetPoint(
         MageToolsDB.hudPoint or "CENTER",
         UIParent,
@@ -92,7 +97,11 @@ function CM:CreateHUD()
     for i, cat in ipairs(categories) do
         local btn = CreateFrame("Button", "MageToolsHUD" .. cat.type, hudFrame)
         btn:SetSize(btnSize, btnSize)
-        btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
+        if vertical then
+            btn:SetPoint("TOP", hudFrame, "TOP", 0, -8 - ((i - 1) * (btnSize + 2)))
+        else
+            btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
+        end
 
         local iconPath = GetItemIcon(cat.items[1])
         local iconTex = btn:CreateTexture(nil, "BACKGROUND")
@@ -137,10 +146,20 @@ end
 function CM:RebuildHUD()
     if not hudFrame then return end
     local btnSize = MageToolsDB.hudButtonSize
-    hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
+    local vertical = MageToolsDB.hudVertical
+    if vertical then
+        hudFrame:SetSize(btnSize + 16, (btnSize * 3) + 16)
+    else
+        hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
+    end
     for i, btn in ipairs(hudButtons) do
         btn:SetSize(btnSize, btnSize)
-        btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
+        btn:ClearAllPoints()
+        if vertical then
+            btn:SetPoint("TOP", hudFrame, "TOP", 0, -8 - ((i - 1) * (btnSize + 2)))
+        else
+            btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
+        end
     end
 end
 

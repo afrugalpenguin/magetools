@@ -15,6 +15,7 @@ local defaults = {
     autoReply = true,
     queueVisible = true,
     hudButtonSize = 32,
+    hudVertical = false,
     popupColumns = 5,
     popupCloseOnCast = true,
     autoPlaceItems = true,
