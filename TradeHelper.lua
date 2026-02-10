@@ -12,6 +12,10 @@ function TH:Init()
     self:UpdateQueueDisplay()
 end
 
+function TH:GetQueueSize()
+    return #queue
+end
+
 -- Whisper handling
 function TH:MatchKeyword(msg)
     msg = strlower(msg)
@@ -39,17 +43,26 @@ function TH:MatchKeyword(msg)
     return nil
 end
 
+local function NotifyConjureSession()
+    local cm = MT.modules["ConjureManager"]
+    if cm and cm.UpdateSessionIfShown then
+        cm:UpdateSessionIfShown()
+    end
+end
+
 function TH:AddToQueue(name, request)
     -- Check for duplicates, update existing
     for _, entry in ipairs(queue) do
         if entry.name == name then
             entry.request = request
             self:UpdateQueueDisplay()
+            NotifyConjureSession()
             return
         end
     end
     tinsert(queue, { name = name, request = request })
     self:UpdateQueueDisplay()
+    NotifyConjureSession()
 
     if MageToolsDB.autoReply then
         local position = #queue
@@ -70,6 +83,7 @@ function TH:RemoveFromQueue(index)
         SendChatMessage("Enjoy!", "WHISPER", nil, entry.name)
     end
     self:UpdateQueueDisplay()
+    NotifyConjureSession()
     if #queue == 0 then
         queueFrame:Hide()
     end

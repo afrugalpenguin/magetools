@@ -251,21 +251,18 @@ function CM:CreateConjureSession()
     sessionFrame.waterBtn = waterBtn
 end
 
-function CM:GetGroupSize()
-    if IsInRaid() then
-        return GetNumGroupMembers()
-    elseif IsInGroup() then
-        return GetNumGroupMembers()
-    end
-    return 1
+function CM:GetServingCount()
+    local th = MT.modules["TradeHelper"]
+    local queueSize = th and th:GetQueueSize() or 0
+    return math.max(1, queueSize)
 end
 
 function CM:UpdateSessionProgress()
-    local groupSize = self:GetGroupSize()
-    local neededFood = groupSize * MageToolsDB.foodStacksPerPerson * 20
-    local neededWater = groupSize * MageToolsDB.waterStacksPerPerson * 20
+    local serving = self:GetServingCount()
+    local neededFood = serving * MageToolsDB.foodStacksPerPerson * 20
+    local neededWater = serving * MageToolsDB.waterStacksPerPerson * 20
 
-    sessionFrame.groupText:SetText("Group size: " .. groupSize)
+    sessionFrame.groupText:SetText("Serving: " .. serving)
     sessionFrame.foodText:SetText("Food: " .. counts.food .. " / " .. neededFood)
     sessionFrame.waterText:SetText("Water: " .. counts.water .. " / " .. neededWater)
 
@@ -273,6 +270,12 @@ function CM:UpdateSessionProgress()
         sessionFrame.statusText:SetText("Stocked up!")
     else
         sessionFrame.statusText:SetText("")
+    end
+end
+
+function CM:UpdateSessionIfShown()
+    if sessionFrame and sessionFrame:IsShown() then
+        self:UpdateSessionProgress()
     end
 end
 
@@ -288,10 +291,6 @@ end
 function CM:OnEvent(event, ...)
     if event == "BAG_UPDATE" then
         self:ScanBags()
-    elseif event == "GROUP_ROSTER_UPDATE" then
-        if sessionFrame and sessionFrame:IsShown() then
-            self:UpdateSessionProgress()
-        end
     elseif event == "PLAYER_ENTERING_WORLD" then
         local isInitialLogin, isReloadingUi = ...
         if isInitialLogin and MageToolsDB.showSessionOnLogin then
@@ -301,4 +300,4 @@ function CM:OnEvent(event, ...)
     end
 end
 
-MT:RegisterEvents("BAG_UPDATE", "GROUP_ROSTER_UPDATE", "PLAYER_ENTERING_WORLD")
+MT:RegisterEvents("BAG_UPDATE", "PLAYER_ENTERING_WORLD")
