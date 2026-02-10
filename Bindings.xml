@@ -1,5 +1,5 @@
 <Bindings>
-    <Binding name="MAGETOOLS_POPUP" header="MAGETOOLS">
+    <Binding name="MAGETOOLS_POPUP" header="MAGETOOLS" category="ADDONS">
         MageTools_TogglePopup()
     </Binding>
 </Bindings>
