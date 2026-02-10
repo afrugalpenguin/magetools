@@ -40,8 +40,9 @@ end
 local toggleBtn = nil
 
 function PM:Init()
-    self:CreatePopup()
     self:CreateToggleButton()
+    self:UpdateReleaseMode()
+    self:CreatePopup()
     self:ApplyKeybind()
 end
 
@@ -49,25 +50,77 @@ function PM:CreateToggleButton()
     toggleBtn = CreateFrame("Button", "MageToolsPopupToggle", UIParent, "SecureActionButtonTemplate")
     toggleBtn:SetSize(1, 1)
     toggleBtn:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -100, 100)
-    -- Register both so keyboard (fires on down) and mouse buttons (fire on up) both work
     toggleBtn:RegisterForClicks("AnyDown", "AnyUp")
 
-    local ignoreNextUp = false
-    toggleBtn:SetScript("OnClick", function(self, button, down)
-        if down then
-            -- Keyboard keys hit this path
-            MageTools_TogglePopup()
-            ignoreNextUp = true
-        else
-            if ignoreNextUp then
-                -- This is the key-up after a keyboard down — skip it
-                ignoreNextUp = false
-                return
+    -- Insecure methods called from secure WrapScript via CallMethod
+    function toggleBtn:MGT_ShowPopup()
+        if popup and not popup:IsShown() then
+            PM:ShowAtCursor()
+        end
+    end
+    function toggleBtn:MGT_HidePopup()
+        if popup and popup:IsShown() then
+            popup:Hide()
+        end
+    end
+    function toggleBtn:MGT_TogglePopup()
+        MageTools_TogglePopup()
+    end
+
+    -- Hide popup after release-mode cast (runs AFTER template processes the click)
+    toggleBtn:SetScript("PostClick", function(self)
+        if self:GetAttribute("mgtcastpending") then
+            self:SetAttribute("mgtcastpending", nil)
+            if popup and popup:IsShown() then
+                popup:Hide()
             end
-            -- Mouse buttons hit this path (override bindings fire on release)
-            MageTools_TogglePopup()
         end
     end)
+
+    -- WrapScript pre-handler: runs in secure env BEFORE SecureActionButtonTemplate processes click.
+    -- Uses "popupopen" attribute for state (works for both keyboard hold-release and mouse two-press).
+    -- IMPORTANT: Do NOT call MGT_HidePopup when casting — that triggers OnHide which clears
+    -- type/spell via insecure SetAttribute before the template can process them. PostClick handles it.
+    SecureHandlerWrapScript(toggleBtn, "OnClick", toggleBtn, [[
+        -- Clear stale cast attributes so template doesn't act on previous state
+        self:SetAttribute("type", nil)
+        self:SetAttribute("typerelease", nil)
+
+        local rm = self:GetAttribute("releasemode")
+        local sp = self:GetAttribute("mgtspell")
+        local isOpen = self:GetAttribute("popupopen")
+
+        if not rm then
+            self:CallMethod("MGT_TogglePopup")
+            return
+        end
+
+        if not isOpen then
+            -- First press (or key-down): show popup
+            self:SetAttribute("mgtspell", nil)
+            self:SetAttribute("popupopen", 1)
+            self:CallMethod("MGT_ShowPopup")
+        elseif sp then
+            -- Second press (or key-up after hover): cast spell
+            self:SetAttribute("popupopen", nil)
+            self:SetAttribute("mgtcastpending", 1)
+            self:SetAttribute("pressAndHoldAction", 1)
+            self:SetAttribute("type", "spell")
+            self:SetAttribute("typerelease", "spell")
+            self:SetAttribute("spell", sp)
+            return "cast"
+        else
+            -- Second press (or key-up) without hover: cancel
+            self:SetAttribute("popupopen", nil)
+            self:CallMethod("MGT_HidePopup")
+        end
+    ]])
+end
+
+function PM:UpdateReleaseMode()
+    if toggleBtn then
+        toggleBtn:SetAttribute("releasemode", MageToolsDB.popupReleaseMode and true or nil)
+    end
 end
 
 function PM:ApplyKeybind()
@@ -90,6 +143,18 @@ function PM:CreatePopup()
     tinsert(UISpecialFrames, "MageToolsPopup")
 
     popup:SetBackdrop(nil)
+
+    popup:SetScript("OnHide", function()
+        PM:ApplyKeybind()
+        -- Clear release-mode state so next open starts fresh
+        if toggleBtn then
+            toggleBtn:SetAttribute("type", nil)
+            toggleBtn:SetAttribute("spell", nil)
+            toggleBtn:SetAttribute("mgtspell", nil)
+            toggleBtn:SetAttribute("popupopen", nil)
+            toggleBtn:SetAttribute("mgtcastpending", nil)
+        end
+    end)
 
     self:BuildButtons()
 end
@@ -141,8 +206,16 @@ local function CreateSpellButton(spell, prefix, index)
         GameTooltip:Hide()
     end)
 
-    -- Close popup after casting
-    btn:SetScript("PostClick", function()
+    -- Release-to-cast: secure snippet tracks hovered spell on toggleBtn
+    -- The OnClick WrapScript on toggleBtn reads mgtspell and sets type/spell to cast
+    SecureHandlerWrapScript(btn, "OnEnter", toggleBtn, [[
+        if owner:GetAttribute("releasemode") then
+            owner:SetAttribute("mgtspell", self:GetAttribute("spell"))
+        end
+    ]])
+
+    -- Close popup after direct-click cast (click mode)
+    btn:SetScript("PostClick", function(self)
         if MageToolsDB.popupCloseOnCast then
             popup:Hide()
         end

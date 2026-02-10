@@ -25,6 +25,7 @@ local defaults = {
     sessionBgAlpha = 0.9,
     showSessionOnLogin = false,
     popupKeybind = nil,
+    popupReleaseMode = true,
 }
 
 function MageTools:RegisterModule(name, mod)

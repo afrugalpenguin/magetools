@@ -336,6 +336,10 @@ local function BuildGeneralContent(parent)
     y = CreateHeader(parent, "Popup Menu", y - 6)
 
     y = CreateKeybind(parent, "Toggle Keybind", "popupKeybind", y)
+    y = CreateCheckbox(parent, "Release to Cast", "popupReleaseMode", y, function()
+        local pm = MageTools.modules["PopupMenu"]
+        if pm then pm:UpdateReleaseMode() end
+    end)
     y = CreateCheckbox(parent, "Close Popup on Cast", "popupCloseOnCast", y)
 
     parent:SetHeight(math.abs(y) + 8)
