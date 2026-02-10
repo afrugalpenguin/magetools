@@ -130,6 +130,27 @@ function PM:BuildButtons()
         yOffset = yOffset - (conjureRows * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
     end
 
+    -- Buff spells (highest known rank)
+    local buffSpells = {}
+    for _, name in ipairs({"Arcane Intellect", "Arcane Brilliance", "Mage Armor"}) do
+        local id = FindSpellInBook(name)
+        if id then tinsert(buffSpells, { spellID = id }) end
+    end
+
+    if #buffSpells > 0 then
+        local buffDivider = popup:CreateTexture(nil, "ARTWORK")
+        buffDivider:SetHeight(1)
+        buffDivider:SetPoint("TOPLEFT", popup, "TOPLEFT", 8, yOffset - 2)
+        buffDivider:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -8, yOffset - 2)
+        buffDivider:SetColorTexture(0.5, 0.5, 0.5, 0.5)
+        yOffset = yOffset - 6
+
+        cols = self:CreateSpellRow(buffSpells, yOffset, "Buff")
+        if cols > maxCols then maxCols = cols end
+        local buffRows = math.ceil(#buffSpells / MageToolsDB.popupColumns)
+        yOffset = yOffset - (buffRows * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
+    end
+
     -- Size the popup
     local totalCols = maxCols > 0 and maxCols or MageToolsDB.popupColumns
     local width = (totalCols * (MageToolsDB.popupButtonSize + BUTTON_PADDING)) + BUTTON_PADDING + 16

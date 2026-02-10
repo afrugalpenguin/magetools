@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="magetools.png" alt="MageTools" width="128">
+</p>
+
 # MageTools
 
 A mage utility addon for WoW TBC Anniversary. Handles portals, teleports, conjured item tracking, and trade distribution so you can focus on the important things — like not dying.
@@ -39,7 +43,8 @@ World of Warcraft/_classic_/Interface/AddOns/MageTools/
 Settings are stored per-character in `MageToolsDB`. Defaults:
 
 - **Whisper keywords:** water, food, mage
-- **Stacks per person:** 1 (food + water per group member)
+- **Food stacks per person:** 1
+- **Water stacks per person:** 2
 - **Auto-reply:** enabled
 - **HUD:** visible, center of screen
 
