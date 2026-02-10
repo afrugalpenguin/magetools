@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.14.4
+- Remove Bindings.xml (unsupported in TBC Classic Anniversary)
+
 ## v1.14.3
 - Add changelog and include in release zip
 

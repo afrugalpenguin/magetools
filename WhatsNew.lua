@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "1.14.4",
+        features = {},
+        fixes = {
+            "Remove Bindings.xml (unsupported in TBC Classic Anniversary)",
+        },
+    },
+    {
         version = "1.14.3",
         features = {},
         fixes = {
