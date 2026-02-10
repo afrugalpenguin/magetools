@@ -132,7 +132,19 @@ function PM:BuildButtons()
 
     -- Buff spells (highest known rank)
     local buffSpells = {}
-    for _, name in ipairs({"Arcane Intellect", "Arcane Brilliance", "Mage Armor"}) do
+    for _, name in ipairs({"Arcane Intellect", "Arcane Brilliance"}) do
+        local id = FindSpellInBook(name)
+        if id then tinsert(buffSpells, { spellID = id }) end
+    end
+    -- Ice Armor replaces Frost Armor; show highest available
+    for _, name in ipairs({"Ice Armor", "Frost Armor"}) do
+        local id = FindSpellInBook(name)
+        if id then
+            tinsert(buffSpells, { spellID = id })
+            break
+        end
+    end
+    for _, name in ipairs({"Mage Armor", "Molten Armor"}) do
         local id = FindSpellInBook(name)
         if id then tinsert(buffSpells, { spellID = id }) end
     end
