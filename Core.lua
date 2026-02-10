@@ -23,6 +23,8 @@ local defaults = {
     maxQueueDisplay = 10,
     popupBgAlpha = 0.85,
     sessionBgAlpha = 0.9,
+    showSessionOnLogin = false,
+    popupKeybind = nil,
 }
 
 function MageTools:RegisterModule(name, mod)

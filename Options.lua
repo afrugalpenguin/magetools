@@ -102,7 +102,23 @@ local function CreateSlider(parent, label, dbKey, minVal, maxVal, step, yOffset,
     return yOffset - 42
 end
 
-local function CreateKeybind(parent, label, bindingName, yOffset)
+local MOUSE_BUTTON_MAP = {
+    LeftButton = "BUTTON1",
+    RightButton = "BUTTON2",
+    MiddleButton = "BUTTON3",
+    Button4 = "BUTTON4",
+    Button5 = "BUTTON5",
+}
+
+local function GetModifiedKey(key)
+    local mods = ""
+    if IsShiftKeyDown() then mods = mods .. "SHIFT-" end
+    if IsControlKeyDown() then mods = mods .. "CTRL-" end
+    if IsAltKeyDown() then mods = mods .. "ALT-" end
+    return mods .. key
+end
+
+local function CreateKeybind(parent, label, dbKey, yOffset)
     local text = parent:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     text:SetPoint("TOPLEFT", parent, "TOPLEFT", 12, yOffset)
     text:SetText(label)
@@ -121,46 +137,67 @@ local function CreateKeybind(parent, label, bindingName, yOffset)
     local btnText = btn:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
     btnText:SetPoint("CENTER")
 
-    local function UpdateLabel()
-        local key = GetBindingKey(bindingName)
-        btnText:SetText(key or "|cff666666Not bound|r")
-    end
-    UpdateLabel()
-
     local waiting = false
 
+    local function UpdateLabel()
+        local key = MageToolsDB[dbKey]
+        btnText:SetText(key or "|cff666666Not bound|r")
+    end
+
+    local function StopCapture(self)
+        waiting = false
+        self:SetScript("OnKeyDown", nil)
+        self:SetScript("OnMouseDown", nil)
+        self:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
+        self:EnableKeyboard(false)
+        self:EnableMouse(true)
+        UpdateLabel()
+    end
+
+    local function ApplyKey(self, key)
+        MageToolsDB[dbKey] = key
+        local pm = MT.modules["PopupMenu"]
+        if pm and pm.ApplyKeybind then pm:ApplyKeybind() end
+        StopCapture(self)
+    end
+
+    local function OnCaptureKey(self, key)
+        -- Ignore bare modifier keys
+        if key == "LSHIFT" or key == "RSHIFT" or key == "LCTRL" or key == "RCTRL"
+            or key == "LALT" or key == "RALT" then
+            return
+        end
+        if key == "ESCAPE" then
+            StopCapture(self)
+        else
+            ApplyKey(self, GetModifiedKey(key))
+        end
+    end
+
+    local function OnCaptureMouse(self, mouseBtn)
+        local wowKey = MOUSE_BUTTON_MAP[mouseBtn]
+        if wowKey then
+            ApplyKey(self, GetModifiedKey(wowKey))
+        end
+    end
+
+    UpdateLabel()
+
     btn:SetScript("OnClick", function(self, click)
+        if waiting then return end
         if click == "RightButton" then
-            -- Unbind on right-click
-            local key = GetBindingKey(bindingName)
-            if key then
-                SetBinding(key, nil)
-                SaveBindings(GetCurrentBindingSet())
-            end
+            MageToolsDB[dbKey] = nil
+            local pm = MT.modules["PopupMenu"]
+            if pm and pm.ApplyKeybind then pm:ApplyKeybind() end
             UpdateLabel()
             return
         end
-        if waiting then return end
         waiting = true
         btnText:SetText("|cffFFD200Press a key...|r")
         self:SetBackdropBorderColor(ACCENT_COLOR[1], ACCENT_COLOR[2], ACCENT_COLOR[3], 1)
-        self:SetScript("OnKeyDown", function(self, key)
-            if key == "ESCAPE" then
-                -- Cancel
-            else
-                -- Clear any old binding for this action
-                local oldKey = GetBindingKey(bindingName)
-                if oldKey then SetBinding(oldKey, nil) end
-                SetBinding(key, bindingName)
-                SaveBindings(GetCurrentBindingSet())
-            end
-            waiting = false
-            self:SetScript("OnKeyDown", nil)
-            self:SetBackdropBorderColor(0.4, 0.4, 0.4, 1)
-            self:EnableKeyboard(false)
-            UpdateLabel()
-        end)
         self:EnableKeyboard(true)
+        self:SetScript("OnKeyDown", OnCaptureKey)
+        self:SetScript("OnMouseDown", OnCaptureMouse)
     end)
     btn:RegisterForClicks("LeftButtonUp", "RightButtonUp")
 
@@ -291,10 +328,14 @@ local function BuildGeneralContent(parent)
         if cm and cm.RebuildHUD then cm:RebuildHUD() end
     end)
 
+    -- Conjure Session section
+    y = CreateHeader(parent, "Conjure Session", y - 6)
+    y = CreateCheckbox(parent, "Show Conjure Session on Login", "showSessionOnLogin", y)
+
     -- Popup Menu section
     y = CreateHeader(parent, "Popup Menu", y - 6)
 
-    y = CreateKeybind(parent, "Toggle Keybind", "MAGETOOLS_POPUP", y)
+    y = CreateKeybind(parent, "Toggle Keybind", "popupKeybind", y)
     y = CreateSlider(parent, "Buttons Per Row", "popupColumns", 3, 8, 1, y, function()
         local pm = MT.modules["PopupMenu"]
         if pm and pm.Rebuild then pm:Rebuild() end

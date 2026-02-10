@@ -35,8 +35,29 @@ function MageTools_TogglePopup()
     end
 end
 
+local toggleBtn = nil
+
 function PM:Init()
     self:CreatePopup()
+    self:CreateToggleButton()
+    self:ApplyKeybind()
+end
+
+function PM:CreateToggleButton()
+    toggleBtn = CreateFrame("Button", "MageToolsPopupToggle", UIParent, "SecureActionButtonTemplate")
+    toggleBtn:SetSize(1, 1)
+    toggleBtn:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -100, 100)
+    toggleBtn:RegisterForClicks("AnyDown", "AnyUp")
+    toggleBtn:SetScript("OnClick", function() MageTools_TogglePopup() end)
+end
+
+function PM:ApplyKeybind()
+    if not toggleBtn then return end
+    ClearOverrideBindings(toggleBtn)
+    local key = MageToolsDB.popupKeybind
+    if key then
+        SetOverrideBindingClick(toggleBtn, false, key, "MageToolsPopupToggle")
+    end
 end
 
 function PM:CreatePopup()

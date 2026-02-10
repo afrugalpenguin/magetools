@@ -288,7 +288,13 @@ end
 function CM:OnEvent(event, ...)
     if event == "BAG_UPDATE" then
         self:ScanBags()
+    elseif event == "PLAYER_ENTERING_WORLD" then
+        local isInitialLogin, isReloadingUi = ...
+        if isInitialLogin and MageToolsDB.showSessionOnLogin then
+            self:UpdateSessionProgress()
+            sessionFrame:Show()
+        end
     end
 end
 
-MT:RegisterEvents("BAG_UPDATE")
+MT:RegisterEvents("BAG_UPDATE", "PLAYER_ENTERING_WORLD")
