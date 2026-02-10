@@ -336,10 +336,6 @@ local function BuildGeneralContent(parent)
     y = CreateHeader(parent, "Popup Menu", y - 6)
 
     y = CreateKeybind(parent, "Toggle Keybind", "popupKeybind", y)
-    y = CreateSlider(parent, "Buttons Per Row", "popupColumns", 3, 8, 1, y, function()
-        local pm = MT.modules["PopupMenu"]
-        if pm and pm.Rebuild then pm:Rebuild() end
-    end)
     y = CreateCheckbox(parent, "Close Popup on Cast", "popupCloseOnCast", y)
 
     parent:SetHeight(math.abs(y) + 8)

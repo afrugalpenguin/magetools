@@ -5,6 +5,8 @@ MT:RegisterModule("PopupMenu", PM)
 local popup = nil
 local buttons = {}
 local BUTTON_PADDING = 4
+local BLOCK_GAP = 6
+local BLOCK_COLS = 4
 
 -- Scan the spellbook for the highest rank of a spell by name
 local function FindSpellInBook(targetName)
@@ -47,8 +49,25 @@ function PM:CreateToggleButton()
     toggleBtn = CreateFrame("Button", "MageToolsPopupToggle", UIParent, "SecureActionButtonTemplate")
     toggleBtn:SetSize(1, 1)
     toggleBtn:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -100, 100)
+    -- Register both so keyboard (fires on down) and mouse buttons (fire on up) both work
     toggleBtn:RegisterForClicks("AnyDown", "AnyUp")
-    toggleBtn:SetScript("OnClick", function() MageTools_TogglePopup() end)
+
+    local ignoreNextUp = false
+    toggleBtn:SetScript("OnClick", function(self, button, down)
+        if down then
+            -- Keyboard keys hit this path
+            MageTools_TogglePopup()
+            ignoreNextUp = true
+        else
+            if ignoreNextUp then
+                -- This is the key-up after a keyboard down — skip it
+                ignoreNextUp = false
+                return
+            end
+            -- Mouse buttons hit this path (override bindings fire on release)
+            MageTools_TogglePopup()
+        end
+    end)
 end
 
 function PM:ApplyKeybind()
@@ -56,7 +75,7 @@ function PM:ApplyKeybind()
     ClearOverrideBindings(toggleBtn)
     local key = MageToolsDB.popupKeybind
     if key then
-        SetOverrideBindingClick(toggleBtn, false, key, "MageToolsPopupToggle")
+        SetOverrideBindingClick(toggleBtn, true, key, "MageToolsPopupToggle")
     end
 end
 
@@ -65,23 +84,85 @@ function PM:CreatePopup()
     popup:SetFrameStrata("DIALOG")
     popup:SetClampedToScreen(true)
     popup:Hide()
-    popup:EnableMouse(true)
+    popup:EnableMouse(false)
 
     -- Close on Escape
     tinsert(UISpecialFrames, "MageToolsPopup")
-
-    -- Close when clicking outside
-    popup:SetScript("OnMouseDown", function() end)
 
     popup:SetBackdrop(nil)
 
     self:BuildButtons()
 end
 
+local function CreateSpellButton(spell, prefix, index)
+    local btnSize = MageToolsDB.popupButtonSize
+    local btn = CreateFrame("Button", "MageTools" .. prefix .. "Btn" .. index, popup, "SecureActionButtonTemplate")
+    btn:SetSize(btnSize, btnSize)
+
+    btn:SetAttribute("type", "spell")
+    local spellName, _, icon = GetSpellInfo(spell.spellID)
+    btn:SetAttribute("spell", spellName)
+    btn:RegisterForClicks("AnyUp", "AnyDown")
+
+    -- Clear any template-injected normal texture
+    local tmplNormal = btn:GetNormalTexture()
+    if tmplNormal then
+        tmplNormal:SetTexture(nil)
+        tmplNormal:Hide()
+    end
+
+    -- Icon
+    local iconTex = btn:CreateTexture(nil, "BACKGROUND")
+    iconTex:SetAllPoints()
+    iconTex:SetTexture(icon)
+    btn.icon = iconTex
+
+    -- Masque skinning
+    local normalTex, highlightTex
+    if MT.Masque:IsEnabled() then
+        normalTex = btn:CreateTexture(nil, "OVERLAY")
+        normalTex:SetAllPoints()
+        btn:SetNormalTexture(normalTex)
+    end
+
+    highlightTex = btn:CreateTexture(nil, "HIGHLIGHT")
+    highlightTex:SetAllPoints()
+    highlightTex:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
+    highlightTex:SetBlendMode("ADD")
+    btn:SetHighlightTexture(highlightTex)
+
+    -- Tooltip
+    btn:SetScript("OnEnter", function(self)
+        GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+        GameTooltip:SetSpellByID(spell.spellID)
+        GameTooltip:Show()
+    end)
+    btn:SetScript("OnLeave", function()
+        GameTooltip:Hide()
+    end)
+
+    -- Close popup after casting
+    btn:SetScript("PostClick", function()
+        if MageToolsDB.popupCloseOnCast then
+            popup:Hide()
+        end
+    end)
+
+    MT.Masque:AddButton("Popup", btn, {
+        Icon = iconTex,
+        Normal = normalTex,
+        Highlight = highlightTex,
+    })
+
+    tinsert(buttons, btn)
+    return btn
+end
+
 function PM:BuildButtons()
     -- Clear old buttons
     for _, btn in ipairs(buttons) do btn:Hide() end
     wipe(buttons)
+
     local playerFaction = UnitFactionGroup("player")
     local knownTeleports = {}
     local knownPortals = {}
@@ -97,58 +178,18 @@ function PM:BuildButtons()
         end
     end
 
-    local yOffset = -8
-    local maxCols = 0
-
-    -- Teleport row(s)
-    local cols = self:CreateSpellRow(knownTeleports, yOffset, "Teleport")
-    if cols > maxCols then maxCols = cols end
-    local teleportRows = math.ceil(#knownTeleports / MageToolsDB.popupColumns)
-    yOffset = yOffset - (teleportRows * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
-
-    -- Divider
-    if #knownTeleports > 0 and #knownPortals > 0 then
-        local divider = popup:CreateTexture(nil, "ARTWORK")
-        divider:SetHeight(1)
-        divider:SetPoint("TOPLEFT", popup, "TOPLEFT", 8, yOffset - 2)
-        divider:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -8, yOffset - 2)
-        divider:SetColorTexture(0.5, 0.5, 0.5, 0.5)
-        yOffset = yOffset - 6
-    end
-
-    -- Portal row(s)
-    cols = self:CreateSpellRow(knownPortals, yOffset, "Portal")
-    if cols > maxCols then maxCols = cols end
-    local portalRows = math.ceil(#knownPortals / MageToolsDB.popupColumns)
-    yOffset = yOffset - (portalRows * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
-
     -- Conjure spells (scan spellbook for highest known rank)
     local conjureSpells = {}
     for _, name in ipairs({"Conjure Food", "Conjure Water"}) do
         local id = FindSpellInBook(name)
         if id then tinsert(conjureSpells, { spellID = id }) end
     end
-    -- Mana gems have different spell names per tier (highest first)
     for _, name in ipairs({"Conjure Mana Emerald", "Conjure Mana Ruby", "Conjure Mana Citrine", "Conjure Mana Jade", "Conjure Mana Agate"}) do
         local id = FindSpellInBook(name)
         if id then
             tinsert(conjureSpells, { spellID = id })
-            break  -- only show highest known gem
+            break
         end
-    end
-
-    if #conjureSpells > 0 then
-        local conjureDivider = popup:CreateTexture(nil, "ARTWORK")
-        conjureDivider:SetHeight(1)
-        conjureDivider:SetPoint("TOPLEFT", popup, "TOPLEFT", 8, yOffset - 2)
-        conjureDivider:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -8, yOffset - 2)
-        conjureDivider:SetColorTexture(0.5, 0.5, 0.5, 0.5)
-        yOffset = yOffset - 6
-
-        cols = self:CreateSpellRow(conjureSpells, yOffset, "Conjure")
-        if cols > maxCols then maxCols = cols end
-        local conjureRows = math.ceil(#conjureSpells / MageToolsDB.popupColumns)
-        yOffset = yOffset - (conjureRows * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
     end
 
     -- Buff spells (highest known rank)
@@ -157,7 +198,6 @@ function PM:BuildButtons()
         local id = FindSpellInBook(name)
         if id then tinsert(buffSpells, { spellID = id }) end
     end
-    -- Ice Armor replaces Frost Armor; show highest available
     for _, name in ipairs({"Ice Armor", "Frost Armor"}) do
         local id = FindSpellInBook(name)
         if id then
@@ -170,102 +210,72 @@ function PM:BuildButtons()
         if id then tinsert(buffSpells, { spellID = id }) end
     end
 
-    if #buffSpells > 0 then
-        local buffDivider = popup:CreateTexture(nil, "ARTWORK")
-        buffDivider:SetHeight(1)
-        buffDivider:SetPoint("TOPLEFT", popup, "TOPLEFT", 8, yOffset - 2)
-        buffDivider:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -8, yOffset - 2)
-        buffDivider:SetColorTexture(0.5, 0.5, 0.5, 0.5)
-        yOffset = yOffset - 6
+    -- X layout: four blocks around cursor center
+    -- TL = buffs, TR = conjure, BL = teleports, BR = portals
+    local quadrants = {
+        { spells = buffSpells,      prefix = "Buff"     },  -- 1: top-left
+        { spells = conjureSpells,   prefix = "Conjure"  },  -- 2: top-right
+        { spells = knownTeleports,  prefix = "Teleport" },  -- 3: bottom-left
+        { spells = knownPortals,    prefix = "Portal"   },  -- 4: bottom-right
+    }
 
-        cols = self:CreateSpellRow(buffSpells, yOffset, "Buff")
-        if cols > maxCols then maxCols = cols end
-        local buffRows = math.ceil(#buffSpells / MageToolsDB.popupColumns)
-        yOffset = yOffset - (buffRows * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
-    end
+    local btnSize = MageToolsDB.popupButtonSize
+    local spacing = btnSize + BUTTON_PADDING
+    local maxAbsX = 0
+    local maxAbsY = 0
 
-    -- Size the popup
-    local totalCols = maxCols > 0 and maxCols or MageToolsDB.popupColumns
-    local width = (totalCols * (MageToolsDB.popupButtonSize + BUTTON_PADDING)) + BUTTON_PADDING + 16
-    local height = math.abs(yOffset) + 8
-    popup:SetSize(width, height)
-end
+    for qIdx, q in ipairs(quadrants) do
+        if #q.spells > 0 then
+            local cols = math.min(#q.spells, BLOCK_COLS)
+            local rows = math.ceil(#q.spells / BLOCK_COLS)
+            local blockW = cols * spacing
+            local blockH = rows * spacing
 
-function PM:CreateSpellRow(spells, yOffset, prefix)
-    local col = 0
-    local row = 0
-    for i, spell in ipairs(spells) do
-        local btn = CreateFrame("Button", "MageTools" .. prefix .. "Btn" .. i, popup, "SecureActionButtonTemplate")
-        btn:SetSize(MageToolsDB.popupButtonSize, MageToolsDB.popupButtonSize)
-        local x = 8 + (col * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
-        local y = yOffset - (row * (MageToolsDB.popupButtonSize + BUTTON_PADDING))
-        btn:SetPoint("TOPLEFT", popup, "TOPLEFT", x, y)
+            local col = 0
+            local row = 0
+            for i, spell in ipairs(q.spells) do
+                local btn = CreateSpellButton(spell, q.prefix, i)
 
-        btn:SetAttribute("type", "spell")
-        local spellName, _, icon = GetSpellInfo(spell.spellID)
-        btn:SetAttribute("spell", spellName)
-        btn:RegisterForClicks("AnyUp", "AnyDown")
+                local bx, by
+                if qIdx == 1 then       -- top-left
+                    bx = -BLOCK_GAP - blockW + col * spacing + btnSize / 2
+                    by =  BLOCK_GAP + blockH - row * spacing - btnSize / 2
+                elseif qIdx == 2 then   -- top-right
+                    bx =  BLOCK_GAP + col * spacing + btnSize / 2
+                    by =  BLOCK_GAP + blockH - row * spacing - btnSize / 2
+                elseif qIdx == 3 then   -- bottom-left
+                    bx = -BLOCK_GAP - blockW + col * spacing + btnSize / 2
+                    by = -BLOCK_GAP - row * spacing - btnSize / 2
+                else                    -- bottom-right
+                    bx =  BLOCK_GAP + col * spacing + btnSize / 2
+                    by = -BLOCK_GAP - row * spacing - btnSize / 2
+                end
 
-        -- Clear any template-injected normal texture
-        local tmplNormal = btn:GetNormalTexture()
-        if tmplNormal then
-            tmplNormal:SetTexture(nil)
-            tmplNormal:Hide()
-        end
+                btn:ClearAllPoints()
+                btn:SetPoint("CENTER", popup, "CENTER", bx, by)
 
-        -- Icon
-        local iconTex = btn:CreateTexture(nil, "BACKGROUND")
-        iconTex:SetAllPoints()
-        iconTex:SetTexture(icon)
-        btn.icon = iconTex
+                local edgeX = math.abs(bx) + btnSize / 2
+                local edgeY = math.abs(by) + btnSize / 2
+                if edgeX > maxAbsX then maxAbsX = edgeX end
+                if edgeY > maxAbsY then maxAbsY = edgeY end
 
-        -- Masque skinning
-        local normalTex, highlightTex
-        if MT.Masque:IsEnabled() then
-            normalTex = btn:CreateTexture(nil, "OVERLAY")
-            normalTex:SetAllPoints()
-            btn:SetNormalTexture(normalTex)
-        end
-
-        highlightTex = btn:CreateTexture(nil, "HIGHLIGHT")
-        highlightTex:SetAllPoints()
-        highlightTex:SetTexture("Interface\\Buttons\\ButtonHilight-Square")
-        highlightTex:SetBlendMode("ADD")
-        btn:SetHighlightTexture(highlightTex)
-
-        -- Tooltip
-        btn:SetScript("OnEnter", function(self)
-            GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-            GameTooltip:SetSpellByID(spell.spellID)
-            GameTooltip:Show()
-        end)
-        btn:SetScript("OnLeave", function()
-            GameTooltip:Hide()
-        end)
-
-        -- Close popup after casting
-        btn:SetScript("PostClick", function()
-            if MageToolsDB.popupCloseOnCast then
-                popup:Hide()
+                col = col + 1
+                if col >= BLOCK_COLS then
+                    col = 0
+                    row = row + 1
+                end
             end
-        end)
-
-        MT.Masque:AddButton("Popup", btn, {
-            Icon = iconTex,
-            Normal = normalTex,
-            Highlight = highlightTex,
-        })
-
-        tinsert(buttons, btn)
-
-        col = col + 1
-        if col >= MageToolsDB.popupColumns then
-            col = 0
-            row = row + 1
         end
     end
+
     MT.Masque:ReSkin("Popup")
-    return math.min(#spells, MageToolsDB.popupColumns)
+
+    -- Size popup to contain all buttons
+    if maxAbsX > 0 and maxAbsY > 0 then
+        popup:SetSize((maxAbsX + BUTTON_PADDING) * 2, (maxAbsY + BUTTON_PADDING) * 2)
+    else
+        popup:SetSize(1, 1)
+    end
 end
 
 function PM:ShowAtCursor()
