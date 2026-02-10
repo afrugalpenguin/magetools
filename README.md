@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="magetools.png" alt="MageTools" width="128">
+  <img src="magetools.png" alt="MageTools" width="400">
 </p>
 
 # MageTools
