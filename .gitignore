@@ -1,1 +1,29 @@
+# Claude Code
 .claude/
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# Editor/IDE
+*.swp
+*.swo
+*~
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Screenshots / temp files
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.bmp
+nul
+
+# Packaged releases
+*.zip
+*.tar.gz
