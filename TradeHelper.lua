@@ -175,11 +175,17 @@ function TH:CreateQueueFrame()
     end)
     conjBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
 
-    -- Create row buttons
+    -- Create row buttons (SecureActionButton to auto-target on click)
     for i = 1, MageToolsDB.maxQueueDisplay do
-        local row = CreateFrame("Button", "MageToolsQueueRow" .. i, queueFrame)
+        local row = CreateFrame("Button", "MageToolsQueueRow" .. i, queueFrame, "SecureActionButtonTemplate")
         row:SetSize(180, 18)
         row:SetPoint("TOP", queueFrame, "TOP", 0, -8 - (i * 18))
+        row:RegisterForClicks("AnyUp")
+        row:SetAttribute("type1", "macro")  -- left-click: target via macro
+
+        -- Clear template-injected normal texture
+        local tmplNormal = row:GetNormalTexture()
+        if tmplNormal then tmplNormal:SetTexture(nil); tmplNormal:Hide() end
 
         local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         nameText:SetPoint("LEFT", 6, 0)
@@ -191,10 +197,14 @@ function TH:CreateQueueFrame()
 
         row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
 
-        row:SetScript("OnClick", function()
-            if queue[i] then
+        -- Left-click: target + set pending. Right-click: remove from queue.
+        row:SetScript("PostClick", function(self, button)
+            if not queue[i] then return end
+            if button == "RightButton" then
+                TH:RemoveFromQueue(i)
+            else
                 pendingTrade = queue[i]
-                print("|cff69ccf0MageTools|r Target " .. queue[i].name .. " and open trade.")
+                print("|cff69ccf0MageTools|r Targeting " .. queue[i].name .. ". Open trade to deliver.")
             end
         end)
 
@@ -213,8 +223,10 @@ function TH:UpdateQueueDisplay()
             local reqLabel = entry.request
             if reqLabel == "both" then reqLabel = "food+water" end
             queueButtons[i].reqText:SetText("|cffaaaaaa" .. reqLabel .. "|r")
+            queueButtons[i]:SetAttribute("macrotext1", "/target " .. entry.name)
             queueButtons[i]:Show()
         else
+            queueButtons[i]:SetAttribute("macrotext1", "")
             queueButtons[i]:Hide()
         end
     end
@@ -228,9 +240,13 @@ function TH:RebuildQueue()
     local maxDisplay = MageToolsDB.maxQueueDisplay
     -- Create additional rows if needed
     for i = #queueButtons + 1, maxDisplay do
-        local row = CreateFrame("Button", "MageToolsQueueRow" .. i, queueFrame)
+        local row = CreateFrame("Button", "MageToolsQueueRow" .. i, queueFrame, "SecureActionButtonTemplate")
         row:SetSize(180, 18)
         row:SetPoint("TOP", queueFrame, "TOP", 0, -8 - (i * 18))
+        row:RegisterForClicks("AnyUp")
+        row:SetAttribute("type1", "macro")
+        local tmplNormal = row:GetNormalTexture()
+        if tmplNormal then tmplNormal:SetTexture(nil); tmplNormal:Hide() end
         local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
         nameText:SetPoint("LEFT", 6, 0)
         row.nameText = nameText
@@ -238,10 +254,13 @@ function TH:RebuildQueue()
         reqText:SetPoint("RIGHT", -6, 0)
         row.reqText = reqText
         row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
-        row:SetScript("OnClick", function()
-            if queue[i] then
+        row:SetScript("PostClick", function(self, button)
+            if not queue[i] then return end
+            if button == "RightButton" then
+                TH:RemoveFromQueue(i)
+            else
                 pendingTrade = queue[i]
-                print("|cff69ccf0MageTools|r Target " .. queue[i].name .. " and open trade.")
+                print("|cff69ccf0MageTools|r Targeting " .. queue[i].name .. ". Open trade to deliver.")
             end
         end)
         row:Hide()
