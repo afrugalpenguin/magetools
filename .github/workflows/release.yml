@@ -1,0 +1,32 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create addon zip
+        run: |
+          rm -rf MageTools magetools
+          mkdir MageTools
+          cp Core.lua WhatsNew.lua Options.lua Data.lua MasqueHelper.lua PopupMenu.lua ConjureManager.lua TradeHelper.lua Bindings.xml MageTools.toc MageTools/
+          sed -i "s/@project-version@/${{ github.ref_name }}/g" MageTools/MageTools.toc
+          zip -r "MageTools-${{ github.ref_name }}.zip" MageTools/
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: MageTools-${{ github.ref_name }}.zip
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

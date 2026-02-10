@@ -2,10 +2,11 @@
 ## Title: MageTools
 ## Notes: Mage utility addon — portals, conjure tracking, trade helper
 ## Author: FrugalPenguin
-## Version: 1.0.0
+## Version: @project-version@
 ## SavedVariablesPerCharacter: MageToolsDB
 ## OptionalDeps: Masque
 
+Bindings.xml
 Core.lua
 WhatsNew.lua
 Options.lua
