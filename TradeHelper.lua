@@ -5,7 +5,6 @@ MT:RegisterModule("TradeHelper", TH)
 local queue = {}  -- { { name = "Player", request = "water" }, ... }
 local queueFrame = nil
 local queueButtons = {}
-local MAX_QUEUE_DISPLAY = 10
 local pendingTrade = nil  -- name of player we're trying to trade with
 
 function TH:Init()
@@ -154,7 +153,7 @@ function TH:CreateQueueFrame()
     queueFrame.title = title
 
     -- Create row buttons
-    for i = 1, MAX_QUEUE_DISPLAY do
+    for i = 1, MageToolsDB.maxQueueDisplay do
         local row = CreateFrame("Button", "MageToolsQueueRow" .. i, queueFrame)
         row:SetSize(180, 18)
         row:SetPoint("TOP", queueFrame, "TOP", 0, -8 - (i * 18))
@@ -182,8 +181,9 @@ function TH:CreateQueueFrame()
 end
 
 function TH:UpdateQueueDisplay()
-    local visibleCount = math.min(#queue, MAX_QUEUE_DISPLAY)
-    for i = 1, MAX_QUEUE_DISPLAY do
+    local maxDisplay = math.min(MageToolsDB.maxQueueDisplay, #queueButtons)
+    local visibleCount = math.min(#queue, maxDisplay)
+    for i = 1, maxDisplay do
         if i <= visibleCount then
             local entry = queue[i]
             queueButtons[i].nameText:SetText(entry.name)
@@ -198,6 +198,33 @@ function TH:UpdateQueueDisplay()
     -- Resize frame
     local height = 28 + (visibleCount * 18)
     queueFrame:SetSize(200, math.max(40, height))
+end
+
+function TH:RebuildQueue()
+    if not queueFrame then return end
+    local maxDisplay = MageToolsDB.maxQueueDisplay
+    -- Create additional rows if needed
+    for i = #queueButtons + 1, maxDisplay do
+        local row = CreateFrame("Button", "MageToolsQueueRow" .. i, queueFrame)
+        row:SetSize(180, 18)
+        row:SetPoint("TOP", queueFrame, "TOP", 0, -8 - (i * 18))
+        local nameText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        nameText:SetPoint("LEFT", 6, 0)
+        row.nameText = nameText
+        local reqText = row:CreateFontString(nil, "OVERLAY", "GameFontNormalSmall")
+        reqText:SetPoint("RIGHT", -6, 0)
+        row.reqText = reqText
+        row:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight")
+        row:SetScript("OnClick", function()
+            if queue[i] then
+                pendingTrade = queue[i]
+                print("|cff69ccf0MageTools|r Target " .. queue[i].name .. " and open trade.")
+            end
+        end)
+        row:Hide()
+        tinsert(queueButtons, row)
+    end
+    self:UpdateQueueDisplay()
 end
 
 function TH:ToggleQueue()
@@ -221,7 +248,7 @@ function TH:OnEvent(event, ...)
         end
     elseif event == "TRADE_SHOW" then
         -- Trade window opened — if we have a pending trade, place items
-        if pendingTrade then
+        if pendingTrade and MageToolsDB.autoPlaceItems then
             self:PlaceItemsInTrade(pendingTrade.request)
         end
     elseif event == "UI_INFO_MESSAGE" then

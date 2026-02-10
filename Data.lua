@@ -32,6 +32,7 @@ MT.PORTALS = {
 
 -- Conjured food item IDs (all ranks, highest first)
 MT.CONJURED_FOOD = {
+    22895, -- Conjured Cinnamon Roll (Rank 8)
     22019, -- Conjured Croissant (Rank 7)
     8075,  -- Conjured Sourdough (Rank 6)
     1487,  -- Conjured Pumpernickel (Rank 5)
@@ -63,7 +64,7 @@ MT.MANA_GEMS = {
 }
 
 -- Conjure spell IDs (highest rank)
-MT.CONJURE_FOOD_SPELL = 33717  -- Conjure Food Rank 7
+MT.CONJURE_FOOD_SPELL = 33717  -- Conjure Food Rank 8
 MT.CONJURE_WATER_SPELL = 27090 -- Conjure Water Rank 9
 MT.CONJURE_GEM_SPELL = 27101   -- Conjure Mana Emerald
 

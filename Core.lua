@@ -1,5 +1,6 @@
 MageTools = {}
 MageTools.modules = {}
+MageTools.version = "1.0.0"
 
 local frame = CreateFrame("Frame")
 
@@ -9,9 +10,18 @@ local defaults = {
     hudY = 0,
     hudPoint = "CENTER",
     whisperKeywords = { "water", "food", "mage" },
-    stacksPerPerson = 1,
+    foodStacksPerPerson = 1,
+    waterStacksPerPerson = 2,
     autoReply = true,
     queueVisible = true,
+    hudButtonSize = 32,
+    popupColumns = 5,
+    popupCloseOnCast = true,
+    autoPlaceItems = true,
+    popupButtonSize = 36,
+    maxQueueDisplay = 10,
+    popupBgAlpha = 0.85,
+    sessionBgAlpha = 0.9,
 }
 
 function MageTools:RegisterModule(name, mod)
@@ -68,7 +78,10 @@ SLASH_MAGETOOLS1 = "/magetools"
 SLASH_MAGETOOLS2 = "/mgt"
 SlashCmdList["MAGETOOLS"] = function(msg)
     local cmd = strlower(strtrim(msg))
-    if cmd == "hud" then
+    if cmd == "popup" then
+        local pm = MageTools.modules["PopupMenu"]
+        if pm then MageTools_TogglePopup() end
+    elseif cmd == "hud" then
         local cm = MageTools.modules["ConjureManager"]
         if cm then cm:ToggleHUD() end
     elseif cmd == "conjure" then
@@ -77,17 +90,32 @@ SlashCmdList["MAGETOOLS"] = function(msg)
     elseif cmd == "queue" then
         local th = MageTools.modules["TradeHelper"]
         if th then th:ToggleQueue() end
+    elseif cmd == "whatsnew" then
+        local wn = MageTools.modules["WhatsNew"]
+        if wn then wn:Show() end
+    elseif cmd == "options" then
+        local opts = MageTools.modules["Options"]
+        if opts then opts:Toggle() end
     elseif cmd == "config" then
         print("|cff69ccf0MageTools|r config:")
         print("  HUD visible: " .. tostring(MageToolsDB.hudVisible))
         print("  Auto-reply: " .. tostring(MageToolsDB.autoReply))
-        print("  Stacks/person: " .. MageToolsDB.stacksPerPerson)
+        print("  Food stacks/person: " .. MageToolsDB.foodStacksPerPerson)
+        print("  Water stacks/person: " .. MageToolsDB.waterStacksPerPerson)
         print("  Keywords: " .. table.concat(MageToolsDB.whisperKeywords, ", "))
     else
-        print("|cff69ccf0MageTools|r commands:")
-        print("  /mgt hud - Toggle HUD")
-        print("  /mgt conjure - Conjure session")
-        print("  /mgt queue - Toggle trade queue")
-        print("  /mgt config - Show config")
+        local wn = MageTools.modules["WhatsNew"]
+        if wn and wn:ShouldShow() then
+            wn:Show()
+        else
+            print("|cff69ccf0MageTools|r commands:")
+            print("  /mgt popup - Toggle portal menu")
+            print("  /mgt hud - Toggle HUD")
+            print("  /mgt conjure - Conjure session")
+            print("  /mgt queue - Toggle trade queue")
+            print("  /mgt options - Open options panel")
+            print("  /mgt whatsnew - View changelog")
+            print("  /mgt config - Show config")
+        end
     end
 end

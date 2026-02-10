@@ -8,10 +8,10 @@ A mage utility addon for WoW TBC Anniversary. Handles portals, teleports, conjur
 Bind a key in **Key Bindings > MageTools** to open a compact icon grid at your cursor. Shows only spells you know, filtered by faction. Click to cast, popup closes automatically.
 
 ### Conjured Item HUD
-A small draggable frame showing your current mana gem charges, food stacks, and water stacks at a glance. Counts update automatically as you conjure or trade away items. Toggle with `/mt hud`.
+A small draggable frame showing your current mana gem charges, food stacks, and water stacks at a glance. Counts update automatically as you conjure or trade away items. Toggle with `/mgt hud`.
 
 ### Conjure Session
-Open with `/mt conjure` or from the HUD. Shows how many stacks of food and water you need based on your current group/raid size, tracks progress as you conjure, and tells you when you're stocked up. Food and water buttons cast the appropriate conjure spell on each click.
+Open with `/mgt conjure` or from the HUD. Shows how many stacks of food and water you need based on your current group/raid size, tracks progress as you conjure, and tells you when you're stocked up. Food and water buttons cast the appropriate conjure spell on each click.
 
 ### Trade Helper
 When someone whispers you a keyword (default: "water", "food", or "mage"), they're automatically added to a queue with an auto-reply confirming their position. Click a name in the queue frame, target the player, and open trade — items are placed in the trade window automatically. Completed trades send an "Enjoy!" reply and advance the queue.
@@ -28,11 +28,11 @@ World of Warcraft/_classic_/Interface/AddOns/MageTools/
 
 | Command | Description |
 |---------|-------------|
-| `/mt` | Show help |
-| `/mt hud` | Toggle the item count HUD |
-| `/mt conjure` | Toggle the conjure session panel |
-| `/mt queue` | Toggle the trade queue frame |
-| `/mt config` | Print current settings |
+| `/mgt` | Show help |
+| `/mgt hud` | Toggle the item count HUD |
+| `/mgt conjure` | Toggle the conjure session panel |
+| `/mgt queue` | Toggle the trade queue frame |
+| `/mgt config` | Print current settings |
 
 ## Configuration
 

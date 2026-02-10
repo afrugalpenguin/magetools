@@ -7,8 +7,6 @@ local sessionFrame = nil
 local counts = { food = 0, water = 0, gem = 0 }
 local hudButtons = {}
 
-local BUTTON_SIZE = 32
-
 function CM:Init()
     self:ScanBags()
     self:CreateHUD()
@@ -51,12 +49,6 @@ function CM:UpdateDisplays()
         btn.countText:SetText(count > 0 and count or "0")
     end
 
-    -- Update popup menu item counters
-    local pm = MT.modules["PopupMenu"]
-    if pm and pm.UpdateItemCounts then
-        pm:UpdateItemCounts(counts)
-    end
-
     -- Update conjure session if open
     if sessionFrame and sessionFrame:IsShown() then
         self:UpdateSessionProgress()
@@ -66,7 +58,8 @@ end
 -- HUD
 function CM:CreateHUD()
     hudFrame = CreateFrame("Frame", "MageToolsHUD", UIParent, "BackdropTemplate")
-    hudFrame:SetSize((BUTTON_SIZE * 3) + 16, BUTTON_SIZE + 16)
+    local btnSize = MageToolsDB.hudButtonSize
+    hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
     hudFrame:SetPoint(
         MageToolsDB.hudPoint or "CENTER",
         UIParent,
@@ -98,8 +91,8 @@ function CM:CreateHUD()
 
     for i, cat in ipairs(categories) do
         local btn = CreateFrame("Button", "MageToolsHUD" .. cat.type, hudFrame)
-        btn:SetSize(BUTTON_SIZE, BUTTON_SIZE)
-        btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (BUTTON_SIZE + 2)), 0)
+        btn:SetSize(btnSize, btnSize)
+        btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
 
         local iconPath = GetItemIcon(cat.items[1])
         local iconTex = btn:CreateTexture(nil, "BACKGROUND")
@@ -141,6 +134,16 @@ function CM:ToggleHUD()
     end
 end
 
+function CM:RebuildHUD()
+    if not hudFrame then return end
+    local btnSize = MageToolsDB.hudButtonSize
+    hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
+    for i, btn in ipairs(hudButtons) do
+        btn:SetSize(btnSize, btnSize)
+        btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
+    end
+end
+
 -- Conjure Session
 function CM:CreateConjureSession()
     sessionFrame = CreateFrame("Frame", "MageToolsConjureSession", UIParent, "BackdropTemplate")
@@ -163,7 +166,11 @@ function CM:CreateConjureSession()
         tile = true, tileSize = 16, edgeSize = 12,
         insets = { left = 2, right = 2, top = 2, bottom = 2 },
     })
-    sessionFrame:SetBackdropColor(0, 0, 0, 0.9)
+    sessionFrame:SetBackdropColor(0, 0, 0, MageToolsDB.sessionBgAlpha)
+
+    -- Close button
+    local closeBtn = CreateFrame("Button", nil, sessionFrame, "UIPanelCloseButton")
+    closeBtn:SetPoint("TOPRIGHT", sessionFrame, "TOPRIGHT", -2, -2)
 
     -- Title
     local title = sessionFrame:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
@@ -236,9 +243,8 @@ end
 
 function CM:UpdateSessionProgress()
     local groupSize = self:GetGroupSize()
-    local ratio = MageToolsDB.stacksPerPerson
-    local neededFood = groupSize * ratio * 20
-    local neededWater = groupSize * ratio * 20
+    local neededFood = groupSize * MageToolsDB.foodStacksPerPerson * 20
+    local neededWater = groupSize * MageToolsDB.waterStacksPerPerson * 20
 
     sessionFrame.groupText:SetText("Group size: " .. groupSize)
     sessionFrame.foodText:SetText("Food: " .. counts.food .. " / " .. neededFood)
