@@ -1,6 +1,6 @@
 MageTools = {}
 MageTools.modules = {}
-MageTools.version = "1.0.0"
+MageTools.version = "1.14.3"
 
 local frame = CreateFrame("Frame")
 

@@ -1,15 +1,92 @@
 # Changelog
 
-## v1.0.0
+## v1.14.3
+- Add changelog and include in release zip
 
-### Features
-- Portal and teleport popup menu with keybind support
-- Release-to-cast mode (hold keybind, hover spell, release to cast)
-- X layout with quadrant labels (Buffs, Conjure, Teleports, Portals)
-- Conjure Manager HUD with real-time bag scanning
-- Conjure Session panel driven by trade queue
-- Trade Helper with whisper queue and auto-distribution
-- Auto-target on queue click, right-click to remove
-- Custom whisper keyword support
-- Tabbed options panel
-- Masque button skinning support
+## v1.14.2
+- Add GitHub releases workflow and packaging
+
+## v1.14.1
+- Update README tagline and keyword defaults
+
+## v1.14.0
+- Update gitignore with standard patterns
+
+## v1.13.1
+- Support custom whisper keywords in queue matching
+
+## v1.13.0
+- Drive conjure session serving count from trade queue
+
+## v1.12.0
+- Auto-target player on queue row click via secure macro
+- Right-click to remove from queue
+
+## v1.11.0
+- Tabbed options layout replacing sidebar
+- Fix checkbox persistence (coerce nil to false)
+- Add conjure session shortcut button in trade queue
+
+## v1.10.1
+- Add spacing between HUD controls in options
+
+## v1.10.0
+- Update conjure session on group roster changes
+
+## v1.9.1
+- Add quadrant labels (Buffs, Conjure, Teleports, Portals)
+- Add button borders when Masque is not active
+- Single-row layout for all spell categories
+
+## v1.9.0
+- Release-to-cast mode using secure handler WrapScript
+- Hold keybind to open, hover spell, release to cast
+
+## v1.8.0
+- X layout with four quadrants around cursor center
+- Mouse button keybind support
+
+## v1.7.1
+- Rewrite keybind system using SetOverrideBindingClick
+
+## v1.7.0
+- Add Bindings.xml to TOC and keybind button to options
+
+## v1.6.0
+- Add vertical/horizontal orientation toggle for HUD
+
+## v1.5.1
+- Increase README logo width to 400px
+
+## v1.5.0
+- Add Ice/Frost Armor and Molten Armor to buff row
+
+## v1.4.0
+- Add buff spells row to popup menu
+- Add README logo
+
+## v1.3.0
+- Add options panel with configurable settings
+- Conjure session fixes
+
+## v1.2.1
+- Update APIs for TBC Classic Anniversary client
+
+## v1.2.0
+- Address code review issues for TBC compatibility
+
+## v1.1.0
+- Add whisper queue and trade distribution system
+
+## v1.0.3
+- Add bag scanning, HUD, and conjure session panel
+
+## v1.0.2
+- Add keybind-triggered portal/teleport icon grid
+
+## v1.0.1
+- Add mage spell and conjured item ID tables
+- Add Masque integration helper
+
+## v1.0.0
+- Initial release: TOC, event backbone, and saved variables

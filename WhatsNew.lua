@@ -6,13 +6,195 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "1.14.3",
+        features = {},
+        fixes = {
+            "Add changelog and include in release zip",
+        },
+    },
+    {
+        version = "1.14.2",
+        features = {},
+        fixes = {
+            "Add GitHub releases workflow and packaging",
+        },
+    },
+    {
+        version = "1.14.1",
+        features = {},
+        fixes = {
+            "Update README tagline and keyword defaults",
+        },
+    },
+    {
+        version = "1.14.0",
+        features = {},
+        fixes = {
+            "Update gitignore with standard patterns",
+        },
+    },
+    {
+        version = "1.13.1",
+        features = {},
+        fixes = {
+            "Support custom whisper keywords in queue matching",
+        },
+    },
+    {
+        version = "1.13.0",
+        features = {
+            "Drive conjure session serving count from trade queue",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.12.0",
+        features = {
+            "Auto-target player on queue row click via secure macro",
+            "Right-click to remove from queue",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.11.0",
+        features = {
+            "Tabbed options layout replacing sidebar",
+            "Add conjure session shortcut button in trade queue",
+        },
+        fixes = {
+            "Fix checkbox persistence (coerce nil to false)",
+        },
+    },
+    {
+        version = "1.10.1",
+        features = {},
+        fixes = {
+            "Add spacing between HUD controls in options",
+        },
+    },
+    {
+        version = "1.10.0",
+        features = {},
+        fixes = {
+            "Update conjure session on group roster changes",
+        },
+    },
+    {
+        version = "1.9.1",
+        features = {
+            "Add quadrant labels (Buffs, Conjure, Teleports, Portals)",
+            "Add button borders when Masque is not active",
+            "Single-row layout for all spell categories",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.9.0",
+        features = {
+            "Release-to-cast mode using secure handler WrapScript",
+            "Hold keybind to open, hover spell, release to cast",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.8.0",
+        features = {
+            "X layout with four quadrants around cursor center",
+            "Mouse button keybind support",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.7.1",
+        features = {},
+        fixes = {
+            "Rewrite keybind system using SetOverrideBindingClick",
+        },
+    },
+    {
+        version = "1.7.0",
+        features = {
+            "Add Bindings.xml to TOC and keybind button to options",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.6.0",
+        features = {
+            "Add vertical/horizontal orientation toggle for HUD",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.5.0",
+        features = {
+            "Add Ice/Frost Armor and Molten Armor to buff row",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.4.0",
+        features = {
+            "Add buff spells row to popup menu",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.3.0",
+        features = {
+            "Add options panel with configurable settings",
+        },
+        fixes = {
+            "Conjure session fixes",
+        },
+    },
+    {
+        version = "1.2.1",
+        features = {},
+        fixes = {
+            "Update APIs for TBC Classic Anniversary client",
+        },
+    },
+    {
+        version = "1.2.0",
+        features = {},
+        fixes = {
+            "Address code review issues for TBC compatibility",
+        },
+    },
+    {
+        version = "1.1.0",
+        features = {
+            "Add whisper queue and trade distribution system",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.0.3",
+        features = {
+            "Add bag scanning, HUD, and conjure session panel",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.0.2",
+        features = {
+            "Add keybind-triggered portal/teleport icon grid",
+        },
+        fixes = {},
+    },
+    {
+        version = "1.0.1",
+        features = {
+            "Add mage spell and conjured item ID tables",
+            "Add Masque integration helper",
+        },
+        fixes = {},
+    },
+    {
         version = "1.0.0",
         features = {
-            "Portal and teleport popup menu with keybind support",
-            "Conjure Manager HUD with real-time bag scanning",
-            "Conjure Session panel with group-aware tracking",
-            "Trade Helper with whisper queue and auto-distribution",
-            "Masque button skinning support",
+            "Initial release: TOC, event backbone, and saved variables",
         },
         fixes = {},
     },
