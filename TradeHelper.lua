@@ -27,8 +27,8 @@ function TH:MatchKeyword(msg)
                 matched.food = true
             elseif lk == "water" then
                 matched.water = true
-            elseif lk == "mage" then
-                matched.food = true
+            else
+                -- Generic keywords (e.g. "mage", "beer") request water
                 matched.water = true
             end
         end

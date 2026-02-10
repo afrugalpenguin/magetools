@@ -262,6 +262,7 @@ local function CreateKeywordEditor(parent, yOffset)
     addBox:SetSize(120, 20)
     addBox:SetAutoFocus(false)
     addBox:SetFontObject("GameFontHighlightSmall")
+    addBox:EnableMouse(true)
 
     local addBtn = CreateFrame("Button", nil, keywordFrame, "UIPanelButtonTemplate")
     addBtn:SetSize(50, 22)
@@ -278,18 +279,19 @@ local function CreateKeywordEditor(parent, yOffset)
         addBtn:SetPoint("LEFT", addBox, "RIGHT", 6, 0)
     end
 
-    addBtn:SetScript("OnClick", function()
+    local function DoAddKeyword()
         local newKW = strtrim(addBox:GetText())
         if newKW ~= "" then
             tinsert(MageToolsDB.whisperKeywords, newKW)
             addBox:SetText("")
+            addBox:ClearFocus()
             RefreshKeywords()
             RepositionAdd()
         end
-    end)
-    addBox:SetScript("OnEnterPressed", function()
-        addBtn:Click()
-    end)
+    end
+
+    addBtn:SetScript("OnClick", DoAddKeyword)
+    addBox:SetScript("OnEnterPressed", DoAddKeyword)
     addBox:SetScript("OnEscapePressed", function(self)
         self:ClearFocus()
     end)
