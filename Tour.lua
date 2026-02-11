@@ -7,8 +7,6 @@ local TOUR_VERSION = 1
 -- Style constants (matches Options.lua / WhatsNew.lua)
 local BG_COLOR = { 0.08, 0.08, 0.12, 0.98 }
 local BORDER_COLOR = { 0.4, 0.6, 0.9, 1 }
-local ACCENT_COLOR = { 0.4, 0.6, 0.9 }
-
 local tooltipFrame = nil
 local currentStep = 0
 local isRunning = false
@@ -48,9 +46,9 @@ local function CreateTooltipFrame()
 
     -- Skip button
     local skipBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
-    skipBtn:SetSize(60, 22)
+    skipBtn:SetSize(70, 22)
     skipBtn:SetPoint("BOTTOMRIGHT", -12, 8)
-    skipBtn:SetText("Skip")
+    skipBtn:SetText("Skip Tour")
     skipBtn:SetNormalFontObject("GameFontNormalSmall")
     f.skipBtn = skipBtn
 
