@@ -289,7 +289,7 @@ function CM:ToggleConjureSession()
 end
 
 function CM:OnEvent(event, ...)
-    if event == "BAG_UPDATE" then
+    if event == "BAG_UPDATE" or event == "BAG_UPDATE_DELAYED" then
         self:ScanBags()
     elseif event == "PLAYER_ENTERING_WORLD" then
         local isInitialLogin, isReloadingUi = ...
@@ -300,4 +300,4 @@ function CM:OnEvent(event, ...)
     end
 end
 
-MT:RegisterEvents("BAG_UPDATE", "PLAYER_ENTERING_WORLD")
+MT:RegisterEvents("BAG_UPDATE", "BAG_UPDATE_DELAYED", "PLAYER_ENTERING_WORLD")
