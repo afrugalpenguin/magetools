@@ -175,6 +175,7 @@ end
 
 function Tour:Start()
     if isRunning then return end
+    if InCombatLockdown() then return end
     if not tooltipFrame then
         tooltipFrame = CreateTooltipFrame()
 
@@ -192,6 +193,8 @@ function Tour:Start()
             MageToolsDB.tourVersion = TOUR_VERSION
         end)
 
+        -- ESC dismissal: stop tour but don't persist tourVersion,
+        -- so the tour re-shows next login (matches "restart from step 1" design)
         tooltipFrame:SetScript("OnHide", function()
             if isRunning then
                 Tour:Stop()
@@ -206,6 +209,7 @@ end
 
 function Tour:Stop()
     if not isRunning then return end
+    -- Set false before teardown to prevent OnHide re-entry
     isRunning = false
 
     if currentStep > 0 and steps[currentStep] then
