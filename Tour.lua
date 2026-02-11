@@ -179,7 +179,10 @@ local steps = {
         desc = "This is the spell popup \226\128\148 use it to quickly cast teleports, portals, and conjures. Bind a key in Options to open it.",
         setup = function()
             local popup = MageToolsPopup
-            if popup and not popup:IsShown() then popup:Show() end
+            if not popup then return nil end
+            popup:ClearAllPoints()
+            popup:SetPoint("CENTER", UIParent, "CENTER")
+            popup:Show()
             return popup
         end,
         teardown = function()
