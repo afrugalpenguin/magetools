@@ -1,5 +1,9 @@
 # Changelog
 
+## v1.14.5
+- Add luacheck linting configuration
+- Update addon icon
+
 ## v1.14.4
 - Remove Bindings.xml (unsupported in TBC Classic Anniversary)
 

@@ -6,6 +6,14 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "1.14.5",
+        features = {},
+        fixes = {
+            "Add luacheck linting configuration",
+            "Update addon icon",
+        },
+    },
+    {
         version = "1.14.4",
         features = {},
         fixes = {
