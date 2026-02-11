@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "1.14.6",
+        features = {},
+        fixes = {
+            "Improve bag count update responsiveness in conjure window",
+        },
+    },
+    {
         version = "1.14.5",
         features = {},
         fixes = {

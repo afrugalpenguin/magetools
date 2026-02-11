@@ -1,5 +1,8 @@
 # Changelog
 
+## v1.14.6
+- Improve bag count update responsiveness in conjure window
+
 ## v1.14.5
 - Add luacheck linting configuration
 - Update addon icon
