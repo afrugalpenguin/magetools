@@ -175,16 +175,45 @@ local steps = {
         teardown = function() end,
     },
     {
+        title = "Conjure Session",
+        desc = "This panel tracks your conjuring progress during group sessions. You can enable it to show automatically on login in Options.",
+        setup = function()
+            local cm = MT.modules["ConjureManager"]
+            if cm then
+                cm:UpdateSessionProgress()
+                MageToolsConjureSession:Show()
+            end
+            return MageToolsConjureSession
+        end,
+        teardown = function()
+            if MageToolsConjureSession and MageToolsConjureSession:IsShown() then
+                MageToolsConjureSession:Hide()
+            end
+        end,
+    },
+    {
         title = "The Popup Menu",
         desc = "This is the spell popup \226\128\148 use it to quickly cast teleports, portals, and conjures. Bind a key in Options to open it.",
         setup = function()
-            local pm = MT.modules["PopupMenu"]
-            if pm then pm:ShowAtCursor() end
-            return MageToolsPopup
+            local popup = MageToolsPopup
+            if not popup then return nil end
+            popup:ClearAllPoints()
+            popup:SetPoint("CENTER", UIParent, "CENTER")
+            popup:SetBackdrop({
+                bgFile = "Interface\\BUTTONS\\WHITE8X8",
+                edgeFile = "Interface\\BUTTONS\\WHITE8X8",
+                edgeSize = 1,
+            })
+            popup:SetBackdropColor(BG_COLOR[1], BG_COLOR[2], BG_COLOR[3], BG_COLOR[4])
+            popup:SetBackdropBorderColor(BORDER_COLOR[1], BORDER_COLOR[2], BORDER_COLOR[3], BORDER_COLOR[4])
+            popup:Show()
+            return popup
         end,
         teardown = function()
             local popup = MageToolsPopup
-            if popup and popup:IsShown() then popup:Hide() end
+            if not popup then return end
+            popup:SetBackdrop(nil)
+            if popup:IsShown() then popup:Hide() end
         end,
     },
     {
@@ -213,8 +242,12 @@ local function PositionTooltip(targetFrame)
 end
 
 local function ShowStep(index)
+
     local step = steps[index]
-    if not step then return end
+    if not step then
+
+        return
+    end
 
     -- Teardown previous step
     if currentStep > 0 and steps[currentStep] then
@@ -226,7 +259,9 @@ local function ShowStep(index)
 
     -- Setup this step and get the target frame
     local targetFrame = step.setup()
+
     if not targetFrame then
+
         if index < #steps then
             ShowStep(index + 1)
         else
@@ -252,6 +287,7 @@ local function ShowStep(index)
 
     PositionTooltip(targetFrame)
     tooltipFrame:Show()
+
 end
 
 local function BeginSteps()
@@ -259,6 +295,7 @@ local function BeginSteps()
         tooltipFrame = CreateTooltipFrame()
 
         tooltipFrame.nextBtn:SetScript("OnClick", function()
+
             if currentStep < #steps then
                 ShowStep(currentStep + 1)
             else
@@ -268,6 +305,7 @@ local function BeginSteps()
         end)
 
         tooltipFrame.skipBtn:SetScript("OnClick", function()
+
             Tour:Stop()
             MageToolsDB.tourVersion = TOUR_VERSION
         end)
@@ -275,6 +313,7 @@ local function BeginSteps()
         -- ESC dismissal: stop tour but don't persist tourVersion,
         -- so the tour re-shows next login (matches "restart from step 1" design)
         tooltipFrame:SetScript("OnHide", function()
+
             if isRunning then
                 Tour:Stop()
             end
@@ -295,7 +334,9 @@ function Tour:Start()
         welcomeFrame = CreateWelcomeFrame()
 
         welcomeFrame.startBtn:SetScript("OnClick", function()
+            welcomeFrame.startingTour = true
             welcomeFrame:Hide()
+            welcomeFrame.startingTour = nil
             BeginSteps()
         end)
 
@@ -305,8 +346,9 @@ function Tour:Start()
             MageToolsDB.tourVersion = TOUR_VERSION
         end)
 
+        -- ESC on welcome: stop tour without persisting tourVersion
         welcomeFrame:SetScript("OnHide", function()
-            if isRunning and currentStep == 0 then
+            if isRunning and currentStep == 0 and not welcomeFrame.startingTour then
                 Tour:Stop()
             end
         end)
@@ -316,11 +358,13 @@ function Tour:Start()
 end
 
 function Tour:Stop()
+
     if not isRunning then return end
     -- Set false before teardown to prevent OnHide re-entry
     isRunning = false
 
     if currentStep > 0 and steps[currentStep] then
+
         steps[currentStep].teardown()
     end
     HideGlow()
@@ -347,6 +391,8 @@ MT:RegisterEvents("PLAYER_REGEN_DISABLED")
 
 function Tour:Init()
     if not MageToolsDB.tourVersion or MageToolsDB.tourVersion < TOUR_VERSION then
+        -- Suppress conjure session on login so it doesn't compete with the tour
+        MageToolsDB.showSessionOnLogin = false
         C_Timer.After(2, function()
             Tour:Start()
         end)
