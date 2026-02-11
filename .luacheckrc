@@ -65,10 +65,6 @@ read_globals = {
     -- WoW Settings API
     "Settings",
 
-    -- WoW ActionButton API
-    "ActionButton_ShowOverlayGlow",
-    "ActionButton_HideOverlayGlow",
-
     -- WoW Named Frames (created by CreateFrame with global names)
     "MageToolsHUD",
     "MageToolsPopup",

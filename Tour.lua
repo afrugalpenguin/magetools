@@ -63,22 +63,49 @@ local function CreateTooltipFrame()
     return f
 end
 
-local glowingFrame = nil
+local glowFrame = nil
+
+local function CreateGlowFrame()
+    local f = CreateFrame("Frame", nil, UIParent, "BackdropTemplate")
+    f:SetFrameStrata("TOOLTIP")
+    f:SetBackdrop({
+        edgeFile = "Interface\\BUTTONS\\WHITE8X8",
+        edgeSize = 2,
+    })
+    f:SetBackdropBorderColor(0.4, 0.8, 1.0, 1)
+    f:Hide()
+
+    -- Pulse animation
+    local ag = f:CreateAnimationGroup()
+    ag:SetLooping("BOUNCE")
+    local fade = ag:CreateAnimation("Alpha")
+    fade:SetFromAlpha(1)
+    fade:SetToAlpha(0.3)
+    fade:SetDuration(0.8)
+    fade:SetSmoothing("IN_OUT")
+    f.pulse = ag
+
+    return f
+end
 
 local function ShowGlow(frame)
-    if glowingFrame then
-        ActionButton_HideOverlayGlow(glowingFrame)
+    if not glowFrame then
+        glowFrame = CreateGlowFrame()
     end
-    glowingFrame = frame
-    if frame then
-        ActionButton_ShowOverlayGlow(frame)
-    end
+    local pad = 4
+    glowFrame:SetParent(frame)
+    glowFrame:ClearAllPoints()
+    glowFrame:SetPoint("TOPLEFT", frame, "TOPLEFT", -pad, pad)
+    glowFrame:SetPoint("BOTTOMRIGHT", frame, "BOTTOMRIGHT", pad, -pad)
+    glowFrame:SetFrameLevel(frame:GetFrameLevel() + 10)
+    glowFrame:Show()
+    glowFrame.pulse:Play()
 end
 
 local function HideGlow()
-    if glowingFrame then
-        ActionButton_HideOverlayGlow(glowingFrame)
-        glowingFrame = nil
+    if glowFrame then
+        glowFrame.pulse:Stop()
+        glowFrame:Hide()
     end
 end
 
