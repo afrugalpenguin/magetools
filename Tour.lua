@@ -178,12 +178,9 @@ local steps = {
         title = "The Popup Menu",
         desc = "This is the spell popup \226\128\148 use it to quickly cast teleports, portals, and conjures. Bind a key in Options to open it.",
         setup = function()
-            local popup = MageToolsPopup
-            if not popup then return nil end
-            popup:ClearAllPoints()
-            popup:SetPoint("CENTER", UIParent, "CENTER")
-            popup:Show()
-            return popup
+            local pm = MT.modules["PopupMenu"]
+            if pm then pm:ShowAtCursor() end
+            return MageToolsPopup
         end,
         teardown = function()
             local popup = MageToolsPopup
