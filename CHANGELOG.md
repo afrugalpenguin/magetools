@@ -1,5 +1,12 @@
 # Changelog
 
+## v2.0.0
+- Add onboarding tour with welcome splash and guided highlights
+- Tour auto-starts on first install and after major updates
+- Tour steps: HUD, Conjure Session, Popup Menu, Options
+- Cancel tour on combat entry
+- Start tour anytime with /mgt tour
+
 ## v1.14.6
 - Improve bag count update responsiveness in conjure window
 

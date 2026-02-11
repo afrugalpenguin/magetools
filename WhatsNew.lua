@@ -6,6 +6,15 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.0.0",
+        features = {
+            "Onboarding tour with welcome splash and guided highlights",
+            "Tour steps: HUD, Conjure Session, Popup Menu, Options",
+            "Start tour anytime with /mgt tour",
+        },
+        fixes = {},
+    },
+    {
         version = "1.14.6",
         features = {},
         fixes = {
