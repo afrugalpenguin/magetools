@@ -7,9 +7,63 @@ local TOUR_VERSION = 1
 -- Style constants (matches Options.lua / WhatsNew.lua)
 local BG_COLOR = { 0.08, 0.08, 0.12, 0.98 }
 local BORDER_COLOR = { 0.4, 0.6, 0.9, 1 }
+local welcomeFrame = nil
 local tooltipFrame = nil
 local currentStep = 0
 local isRunning = false
+
+local function CreateWelcomeFrame()
+    local f = CreateFrame("Frame", "MageToolsTourWelcome", UIParent, "BackdropTemplate")
+    f:SetSize(320, 260)
+    f:SetPoint("CENTER")
+    f:SetFrameStrata("DIALOG")
+    f:SetBackdrop({
+        bgFile = "Interface\\BUTTONS\\WHITE8X8",
+        edgeFile = "Interface\\BUTTONS\\WHITE8X8",
+        edgeSize = 1,
+    })
+    f:SetBackdropColor(BG_COLOR[1], BG_COLOR[2], BG_COLOR[3], BG_COLOR[4])
+    f:SetBackdropBorderColor(BORDER_COLOR[1], BORDER_COLOR[2], BORDER_COLOR[3], BORDER_COLOR[4])
+    f:Hide()
+
+    tinsert(UISpecialFrames, "MageToolsTourWelcome")
+
+    -- Logo
+    local logo = f:CreateTexture(nil, "ARTWORK")
+    logo:SetSize(64, 64)
+    logo:SetPoint("TOP", 0, -20)
+    logo:SetTexture("Interface\\AddOns\\MageTools\\magetools")
+
+    -- Title
+    local title = f:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
+    title:SetPoint("TOP", logo, "BOTTOM", 0, -12)
+    title:SetText("|cff88ddffWelcome to MageTools!|r")
+
+    -- Subtitle
+    local subtitle = f:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+    subtitle:SetPoint("TOP", title, "BOTTOM", 0, -10)
+    subtitle:SetPoint("LEFT", f, "LEFT", 20, 0)
+    subtitle:SetPoint("RIGHT", f, "RIGHT", -20, 0)
+    subtitle:SetJustifyH("CENTER")
+    subtitle:SetWordWrap(true)
+    subtitle:SetText("Let us show you around. We'll highlight the key features so you can get started quickly.")
+
+    -- Start Tour button
+    local startBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+    startBtn:SetSize(120, 26)
+    startBtn:SetPoint("BOTTOM", f, "BOTTOM", -70, 16)
+    startBtn:SetText("Start Tour")
+    f.startBtn = startBtn
+
+    -- No Thanks button
+    local noBtn = CreateFrame("Button", nil, f, "UIPanelButtonTemplate")
+    noBtn:SetSize(120, 26)
+    noBtn:SetPoint("BOTTOM", f, "BOTTOM", 70, 16)
+    noBtn:SetText("No Thanks")
+    f.noBtn = noBtn
+
+    return f
+end
 
 local function CreateTooltipFrame()
     local f = CreateFrame("Frame", "MageToolsTour", UIParent, "BackdropTemplate")
@@ -200,9 +254,7 @@ local function ShowStep(index)
     tooltipFrame:Show()
 end
 
-function Tour:Start()
-    if isRunning then return end
-    if InCombatLockdown() then return end
+local function BeginSteps()
     if not tooltipFrame then
         tooltipFrame = CreateTooltipFrame()
 
@@ -229,9 +281,38 @@ function Tour:Start()
         end)
     end
 
-    isRunning = true
     currentStep = 0
     ShowStep(1)
+end
+
+function Tour:Start()
+    if isRunning then return end
+    if InCombatLockdown() then return end
+
+    isRunning = true
+
+    if not welcomeFrame then
+        welcomeFrame = CreateWelcomeFrame()
+
+        welcomeFrame.startBtn:SetScript("OnClick", function()
+            welcomeFrame:Hide()
+            BeginSteps()
+        end)
+
+        welcomeFrame.noBtn:SetScript("OnClick", function()
+            welcomeFrame:Hide()
+            Tour:Stop()
+            MageToolsDB.tourVersion = TOUR_VERSION
+        end)
+
+        welcomeFrame:SetScript("OnHide", function()
+            if isRunning and currentStep == 0 then
+                Tour:Stop()
+            end
+        end)
+    end
+
+    welcomeFrame:Show()
 end
 
 function Tour:Stop()
@@ -244,6 +325,9 @@ function Tour:Stop()
     end
     HideGlow()
 
+    if welcomeFrame then
+        welcomeFrame:Hide()
+    end
     if tooltipFrame then
         tooltipFrame:Hide()
     end

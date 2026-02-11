@@ -70,6 +70,7 @@ read_globals = {
     "MageToolsPopup",
     "MageToolsOptions",
     "MageToolsTour",
+    "MageToolsTourWelcome",
     "MageToolsConjureSession",
 
     -- Lua globals (WoW extensions)
