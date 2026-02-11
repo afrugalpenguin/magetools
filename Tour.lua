@@ -229,3 +229,11 @@ function Tour:OnEvent(event, ...)
 end
 
 MT:RegisterEvents("PLAYER_REGEN_DISABLED")
+
+function Tour:Init()
+    if not MageToolsDB.tourVersion or MageToolsDB.tourVersion < TOUR_VERSION then
+        C_Timer.After(2, function()
+            Tour:Start()
+        end)
+    end
+end

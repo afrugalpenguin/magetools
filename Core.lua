@@ -107,6 +107,9 @@ SlashCmdList["MAGETOOLS"] = function(msg)
         print("  Food stacks/person: " .. MageToolsDB.foodStacksPerPerson)
         print("  Water stacks/person: " .. MageToolsDB.waterStacksPerPerson)
         print("  Keywords: " .. table.concat(MageToolsDB.whisperKeywords, ", "))
+    elseif cmd == "tour" then
+        local tour = MageTools.modules["Tour"]
+        if tour then tour:Start() end
     else
         local wn = MageTools.modules["WhatsNew"]
         if wn and wn:ShouldShow() then
@@ -120,6 +123,7 @@ SlashCmdList["MAGETOOLS"] = function(msg)
             print("  /mgt options - Open options panel")
             print("  /mgt whatsnew - View changelog")
             print("  /mgt config - Show config")
+            print("  /mgt tour - Start onboarding tour")
         end
     end
 end
