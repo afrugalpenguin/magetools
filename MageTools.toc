@@ -9,6 +9,7 @@
 Core.lua
 WhatsNew.lua
 Options.lua
+Tour.lua
 Data.lua
 MasqueHelper.lua
 PopupMenu.lua
