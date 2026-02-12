@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.2
+- Fix Shattrath teleport/portal not showing for both factions (use correct faction-specific spell IDs)
+
 ## v2.0.1
 - Fix Tour.lua missing from release package
 

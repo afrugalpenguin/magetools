@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.0.2",
+        features = {},
+        fixes = {
+            "Fix Shattrath teleport/portal not showing for both factions",
+        },
+    },
+    {
         version = "2.0.1",
         features = {},
         fixes = {
