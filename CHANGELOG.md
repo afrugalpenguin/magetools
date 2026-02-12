@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.1
+- Fix Tour.lua missing from release package
+
 ## v2.0.0
 - Add onboarding tour with welcome splash and guided highlights
 - Tour auto-starts on first install and after major updates

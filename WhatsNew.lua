@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.0.1",
+        features = {},
+        fixes = {
+            "Fix Tour.lua missing from release package",
+        },
+    },
+    {
         version = "2.0.0",
         features = {
             "Onboarding tour with welcome splash and guided highlights",
