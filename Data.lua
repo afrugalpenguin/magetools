@@ -11,8 +11,9 @@ MT.TELEPORTS = {
     { spellID = 3563,  name = "Undercity",    faction = "Horde" },
     { spellID = 3566,  name = "Thunder Bluff", faction = "Horde" },
     { spellID = 32272, name = "Silvermoon",   faction = "Horde" },
-    -- Neutral
-    { spellID = 35715, name = "Shattrath",    faction = "Neutral" },
+    -- Shattrath (faction-specific spell IDs)
+    { spellID = 33690, name = "Shattrath",    faction = "Alliance" },
+    { spellID = 35715, name = "Shattrath",    faction = "Horde" },
 }
 
 MT.PORTALS = {
@@ -26,8 +27,9 @@ MT.PORTALS = {
     { spellID = 11418, name = "Undercity",    faction = "Horde" },
     { spellID = 11420, name = "Thunder Bluff", faction = "Horde" },
     { spellID = 32267, name = "Silvermoon",   faction = "Horde" },
-    -- Neutral
-    { spellID = 33691, name = "Shattrath",    faction = "Neutral" },
+    -- Shattrath (faction-specific spell IDs)
+    { spellID = 33691, name = "Shattrath",    faction = "Alliance" },
+    { spellID = 35717, name = "Shattrath",    faction = "Horde" },
 }
 
 -- Conjured food item IDs (all ranks, highest first)
