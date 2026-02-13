@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.3
+- Fix addon loading and showing HUD on non-Mage characters
+
 ## v2.0.2
 - Fix Shattrath teleport/portal not showing for both factions (use correct faction-specific spell IDs)
 

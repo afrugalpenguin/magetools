@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.0.3",
+        features = {},
+        fixes = {
+            "Fix addon loading and showing HUD on non-Mage characters",
+        },
+    },
+    {
         version = "2.0.2",
         features = {},
         fixes = {
