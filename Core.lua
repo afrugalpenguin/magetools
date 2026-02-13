@@ -53,6 +53,11 @@ frame:SetScript("OnEvent", function(self, event, ...)
     if event == "ADDON_LOADED" then
         local addon = ...
         if addon == "MageTools" then
+            local _, englishClass = UnitClass("player")
+            if englishClass ~= "MAGE" then
+                self:UnregisterEvent("ADDON_LOADED")
+                return
+            end
             MageTools:InitDB()
             MageTools.Masque:Init()
             for name, mod in pairs(MageTools.modules) do
