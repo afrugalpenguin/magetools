@@ -2,6 +2,20 @@ MageTools = {}
 MageTools.modules = {}
 MageTools.version = "2.0.3"
 
+-- Make a child frame propagate drag events to its movable parent
+function MageTools:PropagateDrag(child)
+    child:RegisterForDrag("LeftButton")
+    child:HookScript("OnDragStart", function(self)
+        local parent = self:GetParent()
+        parent:StartMoving()
+    end)
+    child:HookScript("OnDragStop", function(self)
+        local parent = self:GetParent()
+        parent:StopMovingOrSizing()
+        if parent.SavePosition then parent:SavePosition() end
+    end)
+end
+
 local frame = CreateFrame("Frame")
 
 local defaults = {

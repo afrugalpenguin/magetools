@@ -80,11 +80,14 @@ function CM:CreateHUD()
     hudFrame:SetScript("OnDragStart", function(self) self:StartMoving() end)
     hudFrame:SetScript("OnDragStop", function(self)
         self:StopMovingOrSizing()
+        self:SavePosition()
+    end)
+    function hudFrame:SavePosition()
         local point, _, _, x, y = self:GetPoint()
         MageToolsDB.hudPoint = point
         MageToolsDB.hudX = x
         MageToolsDB.hudY = y
-    end)
+    end
 
     hudFrame:SetBackdrop(nil)
 
@@ -126,6 +129,7 @@ function CM:CreateHUD()
             Normal = normalTex,
         })
 
+        MT:PropagateDrag(btn)
         tinsert(hudButtons, btn)
     end
     MT.Masque:ReSkin("HUD")
@@ -231,6 +235,7 @@ function CM:CreateConjureSession()
     foodBtnTex:SetAllPoints()
     foodBtnTex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
     foodBtnTex:SetTexCoord(0, 0.625, 0, 0.6875)
+    MT:PropagateDrag(foodBtn)
     sessionFrame.foodBtn = foodBtn
 
     -- Conjure Water button
@@ -248,6 +253,7 @@ function CM:CreateConjureSession()
     waterBtnTex:SetAllPoints()
     waterBtnTex:SetTexture("Interface\\Buttons\\UI-Panel-Button-Up")
     waterBtnTex:SetTexCoord(0, 0.625, 0, 0.6875)
+    MT:PropagateDrag(waterBtn)
     sessionFrame.waterBtn = waterBtn
 end
 

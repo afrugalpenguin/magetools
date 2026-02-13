@@ -188,6 +188,7 @@ function TH:CreateQueueFrame()
         GameTooltip:Show()
     end)
     conjBtn:SetScript("OnLeave", function() GameTooltip:Hide() end)
+    MT:PropagateDrag(conjBtn)
 
     -- Create row buttons (SecureActionButton to auto-target on click)
     for i = 1, MageToolsDB.maxQueueDisplay do
@@ -222,6 +223,7 @@ function TH:CreateQueueFrame()
             end
         end)
 
+        MT:PropagateDrag(row)
         row:Hide()
         tinsert(queueButtons, row)
     end
@@ -277,6 +279,7 @@ function TH:RebuildQueue()
                 print("|cff69ccf0MageTools|r Targeting " .. queue[i].name .. ". Open trade to deliver.")
             end
         end)
+        MT:PropagateDrag(row)
         row:Hide()
         tinsert(queueButtons, row)
     end
