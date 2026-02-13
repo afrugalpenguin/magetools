@@ -5,6 +5,7 @@ MT:RegisterModule("ConjureManager", CM)
 local hudFrame = nil
 local sessionFrame = nil
 local counts = { food = 0, water = 0, gem = 0 }
+local foundItem = { food = nil, water = nil, gem = nil }
 local hudButtons = {}
 
 function CM:Init()
@@ -23,6 +24,9 @@ function CM:ScanBags()
     counts.food = 0
     counts.water = 0
     counts.gem = 0
+    foundItem.food = nil
+    foundItem.water = nil
+    foundItem.gem = nil
     for bag = 0, NUM_BAG_SLOTS do
         local numSlots = C_Container.GetContainerNumSlots(bag)
         for slot = 1, numSlots do
@@ -31,6 +35,9 @@ function CM:ScanBags()
                 local itemType = MT.CONJURED_ITEM_SET[info.itemID]
                 if itemType then
                     counts[itemType] = counts[itemType] + (info.stackCount or 0)
+                    if not foundItem[itemType] then
+                        foundItem[itemType] = info.itemID
+                    end
                 end
             end
         end
@@ -47,6 +54,9 @@ function CM:UpdateDisplays()
     for _, btn in ipairs(hudButtons) do
         local count = counts[btn.itemType] or 0
         btn.countText:SetText(count > 0 and count or "0")
+        local itemID = foundItem[btn.itemType] or btn.defaultItemID
+        local icon = GetItemIcon(itemID)
+        if icon then btn.icon:SetTexture(icon) end
     end
 
     -- Update conjure session if open
@@ -123,6 +133,7 @@ function CM:CreateHUD()
         countText:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
         btn.countText = countText
         btn.itemType = cat.type
+        btn.defaultItemID = cat.items[1]
 
         MT.Masque:AddButton("HUD", btn, {
             Icon = iconTex,
