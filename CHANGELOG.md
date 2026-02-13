@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.5
+- Fix HUD showing wrong mana gem/food/water icon — now matches what's actually in your bags
+
 ## v2.0.4
 - Fix finnicky frame dragging by propagating drag events from child buttons to parent frames
 

@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.0.5",
+        features = {},
+        fixes = {
+            "HUD icons now match the actual conjured items in your bags",
+        },
+    },
+    {
         version = "2.0.4",
         features = {},
         fixes = {
