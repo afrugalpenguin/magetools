@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.0.4",
+        features = {},
+        fixes = {
+            "Fix finnicky frame dragging (HUD, Trade Queue, Conjure Session)",
+        },
+    },
+    {
         version = "2.0.3",
         features = {},
         fixes = {

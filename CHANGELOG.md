@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.0.4
+- Fix finnicky frame dragging by propagating drag events from child buttons to parent frames
+
 ## v2.0.3
 - Fix addon loading and showing HUD on non-Mage characters
 
