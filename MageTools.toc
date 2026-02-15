@@ -5,6 +5,7 @@
 ## Version: @project-version@
 ## SavedVariablesPerCharacter: MageToolsDB
 ## OptionalDeps: Masque
+## X-Curse-Project-ID: 1459247
 
 Core.lua
 WhatsNew.lua
