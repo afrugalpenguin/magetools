@@ -11,22 +11,16 @@ permissions:
 jobs:
   release:
     runs-on: ubuntu-latest
+
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
-      - name: Checkout
+      - name: Clone project
         uses: actions/checkout@v4
-
-      - name: Create addon zip
-        run: |
-          rm -rf MageTools magetools
-          mkdir MageTools
-          cp Core.lua WhatsNew.lua Options.lua Tour.lua Data.lua MasqueHelper.lua PopupMenu.lua ConjureManager.lua TradeHelper.lua MageTools.toc CHANGELOG.md MageTools/
-          sed -i "s/@project-version@/${{ github.ref_name }}/g" MageTools/MageTools.toc
-          zip -r "MageTools-${{ github.ref_name }}.zip" MageTools/
-
-      - name: Create Release
-        uses: softprops/action-gh-release@v1
         with:
-          files: MageTools-${{ github.ref_name }}.zip
-          generate_release_notes: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Package and release
+        uses: BigWigsMods/packager@v2
