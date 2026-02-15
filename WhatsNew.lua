@@ -6,6 +6,17 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.2.0",
+        features = {
+            "Smart gem conjure — auto-deletes existing mana gem before conjuring a new one",
+            "Popup category toggles — hide/show Buffs, Food/Water, Gems, Teleports, or Portals in Options",
+        },
+        fixes = {
+            "Fix popup button icons appearing black",
+            "Fix release-to-cast mode casting when cursor is off all buttons",
+        },
+    },
+    {
         version = "2.1.0",
         features = {
             "Party chat detection — party members can request food/water via chat keywords (enable in Trade Helper settings)",
