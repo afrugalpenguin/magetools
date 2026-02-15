@@ -41,6 +41,7 @@ local defaults = {
     showSessionOnLogin = false,
     popupKeybind = nil,
     popupReleaseMode = true,
+    popupCategories = { buffs = true, conjureFood = true, conjureGems = true, teleports = true, portals = true },
 }
 
 function MageTools:RegisterModule(name, mod)
@@ -53,11 +54,18 @@ function MageTools:InitDB()
         if MageToolsDB[k] == nil then
             if type(v) == "table" then
                 MageToolsDB[k] = {}
-                for i, val in ipairs(v) do
-                    MageToolsDB[k][i] = val
+                for dk, dv in pairs(v) do
+                    MageToolsDB[k][dk] = dv
                 end
             else
                 MageToolsDB[k] = v
+            end
+        elseif type(v) == "table" and type(MageToolsDB[k]) == "table" then
+            -- Merge missing keys into existing table (e.g. new popupCategories entries)
+            for dk, dv in pairs(v) do
+                if MageToolsDB[k][dk] == nil then
+                    MageToolsDB[k][dk] = dv
+                end
             end
         end
     end

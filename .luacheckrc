@@ -27,6 +27,7 @@ read_globals = {
     "BackdropTemplateMixin",
 
     -- WoW Unit API
+    "UnitClass",
     "UnitFactionGroup",
     "UnitName",
 
@@ -45,6 +46,7 @@ read_globals = {
 
     -- WoW Container API
     "C_Container",
+    "DeleteCursorItem",
 
     -- WoW Chat/Trade API
     "SendChatMessage",

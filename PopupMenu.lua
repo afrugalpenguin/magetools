@@ -25,6 +25,26 @@ local function FindSpellInBook(targetName)
     return foundID
 end
 
+-- Delete the current mana gem from bags so a new one can be conjured
+local function FindAndDeleteManaGem()
+    for bag = 0, NUM_BAG_SLOTS do
+        local numSlots = C_Container.GetContainerNumSlots(bag)
+        for slot = 1, numSlots do
+            local info = C_Container.GetContainerItemInfo(bag, slot)
+            if info and info.itemID then
+                for _, gemID in ipairs(MT.MANA_GEMS) do
+                    if info.itemID == gemID then
+                        C_Container.PickupContainerItem(bag, slot)
+                        DeleteCursorItem()
+                        return true
+                    end
+                end
+            end
+        end
+    end
+    return false
+end
+
 -- Binding header and name (for Key Bindings UI)
 BINDING_HEADER_MAGETOOLS = "MageTools"
 BINDING_NAME_MAGETOOLS_POPUP = "Toggle Portal Menu"
@@ -67,6 +87,9 @@ function PM:CreateToggleButton()
     function toggleBtn:MGT_TogglePopup()
         MageTools_TogglePopup()
     end
+    function toggleBtn:MGT_DeleteGem()
+        FindAndDeleteManaGem()
+    end
 
     -- Hide popup after release-mode cast (runs AFTER template processes the click)
     toggleBtn:SetScript("PostClick", function(self)
@@ -103,6 +126,10 @@ function PM:CreateToggleButton()
             self:CallMethod("MGT_ShowPopup")
         elseif sp then
             -- Second press (or key-up after hover): cast spell
+            if self:GetAttribute("mgtdelgem") then
+                self:CallMethod("MGT_DeleteGem")
+                self:SetAttribute("mgtdelgem", nil)
+            end
             self:SetAttribute("popupopen", nil)
             self:SetAttribute("mgtcastpending", 1)
             self:SetAttribute("pressAndHoldAction", 1)
@@ -154,13 +181,14 @@ function PM:CreatePopup()
             toggleBtn:SetAttribute("mgtspell", nil)
             toggleBtn:SetAttribute("popupopen", nil)
             toggleBtn:SetAttribute("mgtcastpending", nil)
+            toggleBtn:SetAttribute("mgtdelgem", nil)
         end
     end)
 
     self:BuildButtons()
 end
 
-local function CreateSpellButton(spell, prefix, index)
+local function CreateSpellButton(spell, prefix, index, isGemConjure)
     local btnSize = MageToolsDB.popupButtonSize
     local btn = CreateFrame("Button", "MageTools" .. prefix .. "Btn" .. index, popup, "SecureActionButtonTemplate")
     btn:SetSize(btnSize, btnSize)
@@ -170,6 +198,10 @@ local function CreateSpellButton(spell, prefix, index)
     btn:SetAttribute("spell", spellName)
     btn:RegisterForClicks("AnyUp", "AnyDown")
 
+    if isGemConjure then
+        btn:SetAttribute("mgtgemconjure", 1)
+    end
+
     -- Clear any template-injected normal texture
     local tmplNormal = btn:GetNormalTexture()
     if tmplNormal then
@@ -178,7 +210,7 @@ local function CreateSpellButton(spell, prefix, index)
     end
 
     -- Icon
-    local iconTex = btn:CreateTexture(nil, "BACKGROUND")
+    local iconTex = btn:CreateTexture(nil, "ARTWORK")
     iconTex:SetPoint("TOPLEFT", 1, -1)
     iconTex:SetPoint("BOTTOMRIGHT", -1, 1)
     iconTex:SetTexture(icon)
@@ -191,11 +223,10 @@ local function CreateSpellButton(spell, prefix, index)
         normalTex:SetAllPoints()
         btn:SetNormalTexture(normalTex)
     else
-        -- Thin border around icon
-        local border = btn:CreateTexture(nil, "ARTWORK")
+        -- Thin border around icon (BACKGROUND so icon at ARTWORK draws on top)
+        local border = btn:CreateTexture(nil, "BACKGROUND")
         border:SetAllPoints()
         border:SetColorTexture(0, 0, 0, 1)
-        -- Icon is inset by 1px so the black shows as a border
     end
 
     highlightTex = btn:CreateTexture(nil, "HIGHLIGHT")
@@ -219,11 +250,25 @@ local function CreateSpellButton(spell, prefix, index)
     SecureHandlerWrapScript(btn, "OnEnter", toggleBtn, [[
         if owner:GetAttribute("releasemode") then
             owner:SetAttribute("mgtspell", self:GetAttribute("spell"))
+            owner:SetAttribute("mgtdelgem", self:GetAttribute("mgtgemconjure"))
+        end
+    ]])
+    SecureHandlerWrapScript(btn, "OnLeave", toggleBtn, [[
+        if owner:GetAttribute("releasemode") then
+            owner:SetAttribute("mgtspell", nil)
+            owner:SetAttribute("mgtdelgem", nil)
         end
     ]])
 
+    -- Direct-click mode: delete existing gem before conjuring
+    if isGemConjure then
+        btn:SetScript("PreClick", function()
+            FindAndDeleteManaGem()
+        end)
+    end
+
     -- Close popup after direct-click cast (click mode)
-    btn:SetScript("PostClick", function(self)
+    btn:SetScript("PostClick", function()
         if MageToolsDB.popupCloseOnCast then
             popup:Hide()
         end
@@ -246,51 +291,67 @@ function PM:BuildButtons()
     for _, lbl in ipairs(labels) do lbl:Hide() end
     wipe(labels)
 
+    local cats = MageToolsDB.popupCategories
     local playerFaction = UnitFactionGroup("player")
     local knownTeleports = {}
     local knownPortals = {}
 
-    for _, spell in ipairs(MT.TELEPORTS) do
-        if (spell.faction == playerFaction or spell.faction == "Neutral") and IsSpellKnown(spell.spellID) then
-            tinsert(knownTeleports, spell)
+    if cats.teleports then
+        for _, spell in ipairs(MT.TELEPORTS) do
+            if (spell.faction == playerFaction or spell.faction == "Neutral") and IsSpellKnown(spell.spellID) then
+                tinsert(knownTeleports, spell)
+            end
         end
     end
-    for _, spell in ipairs(MT.PORTALS) do
-        if (spell.faction == playerFaction or spell.faction == "Neutral") and IsSpellKnown(spell.spellID) then
-            tinsert(knownPortals, spell)
+    if cats.portals then
+        for _, spell in ipairs(MT.PORTALS) do
+            if (spell.faction == playerFaction or spell.faction == "Neutral") and IsSpellKnown(spell.spellID) then
+                tinsert(knownPortals, spell)
+            end
         end
     end
 
-    -- Conjure spells (scan spellbook for highest known rank)
-    local conjureSpells = {}
-    for _, name in ipairs({"Conjure Food", "Conjure Water"}) do
-        local id = FindSpellInBook(name)
-        if id then tinsert(conjureSpells, { spellID = id }) end
-    end
-    for _, name in ipairs({"Conjure Mana Emerald", "Conjure Mana Ruby", "Conjure Mana Citrine", "Conjure Mana Jade", "Conjure Mana Agate"}) do
-        local id = FindSpellInBook(name)
-        if id then
-            tinsert(conjureSpells, { spellID = id })
-            break
+    -- Conjure spells: food/water and gems split into separate lists
+    local conjureFoodWater = {}
+    local conjureGems = {}
+    if cats.conjureFood then
+        for _, name in ipairs({"Conjure Food", "Conjure Water"}) do
+            local id = FindSpellInBook(name)
+            if id then tinsert(conjureFoodWater, { spellID = id }) end
         end
     end
+    if cats.conjureGems then
+        for _, name in ipairs({"Conjure Mana Emerald", "Conjure Mana Ruby", "Conjure Mana Citrine", "Conjure Mana Jade", "Conjure Mana Agate"}) do
+            local id = FindSpellInBook(name)
+            if id then
+                tinsert(conjureGems, { spellID = id, isGem = true })
+                break
+            end
+        end
+    end
+    -- Combine enabled conjure spells into one quadrant
+    local conjureSpells = {}
+    for _, s in ipairs(conjureFoodWater) do tinsert(conjureSpells, s) end
+    for _, s in ipairs(conjureGems) do tinsert(conjureSpells, s) end
 
     -- Buff spells (highest known rank)
     local buffSpells = {}
-    for _, name in ipairs({"Arcane Intellect", "Arcane Brilliance"}) do
-        local id = FindSpellInBook(name)
-        if id then tinsert(buffSpells, { spellID = id }) end
-    end
-    for _, name in ipairs({"Ice Armor", "Frost Armor"}) do
-        local id = FindSpellInBook(name)
-        if id then
-            tinsert(buffSpells, { spellID = id })
-            break
+    if cats.buffs then
+        for _, name in ipairs({"Arcane Intellect", "Arcane Brilliance"}) do
+            local id = FindSpellInBook(name)
+            if id then tinsert(buffSpells, { spellID = id }) end
         end
-    end
-    for _, name in ipairs({"Mage Armor", "Molten Armor"}) do
-        local id = FindSpellInBook(name)
-        if id then tinsert(buffSpells, { spellID = id }) end
+        for _, name in ipairs({"Ice Armor", "Frost Armor"}) do
+            local id = FindSpellInBook(name)
+            if id then
+                tinsert(buffSpells, { spellID = id })
+                break
+            end
+        end
+        for _, name in ipairs({"Mage Armor", "Molten Armor"}) do
+            local id = FindSpellInBook(name)
+            if id then tinsert(buffSpells, { spellID = id }) end
+        end
     end
 
     -- X layout: four blocks around cursor center
@@ -319,7 +380,7 @@ function PM:BuildButtons()
             local col = 0
             local row = 0
             for i, spell in ipairs(q.spells) do
-                local btn = CreateSpellButton(spell, q.prefix, i)
+                local btn = CreateSpellButton(spell, q.prefix, i, spell.isGem)
 
                 local bx, by
                 if qIdx == 1 then       -- top-left

@@ -347,6 +347,38 @@ local function BuildGeneralContent(parent)
     end)
     y = CreateCheckbox(parent, "Close Popup on Cast", "popupCloseOnCast", y)
 
+    -- Popup Categories section
+    y = CreateHeader(parent, "Popup Categories", y - 6)
+
+    local categoryItems = {
+        { label = "Show Buffs",              key = "buffs" },
+        { label = "Show Conjure Food/Water", key = "conjureFood" },
+        { label = "Show Conjure Gems",       key = "conjureGems" },
+        { label = "Show Teleports",          key = "teleports" },
+        { label = "Show Portals",            key = "portals" },
+    }
+    for _, item in ipairs(categoryItems) do
+        local catKey = item.key
+        local cb = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
+        cb:SetPoint("TOPLEFT", parent, "TOPLEFT", 8, y)
+        local cbText = cb.text or (cb.GetName and cb:GetName() and _G[cb:GetName() .. "Text"])
+        if cbText then
+            cbText:SetText(item.label)
+            cbText:SetFontObject("GameFontHighlight")
+        else
+            local text = cb:CreateFontString(nil, "OVERLAY", "GameFontHighlight")
+            text:SetPoint("LEFT", cb, "RIGHT", 4, 0)
+            text:SetText(item.label)
+        end
+        cb:SetChecked(MageToolsDB.popupCategories[catKey])
+        cb:SetScript("OnClick", function(self)
+            MageToolsDB.popupCategories[catKey] = not not self:GetChecked()
+            local pm = MT.modules["PopupMenu"]
+            if pm and pm.Rebuild then pm:Rebuild() end
+        end)
+        y = y - 28
+    end
+
     parent:SetHeight(math.abs(y) + 8)
 end
 
