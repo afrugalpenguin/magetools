@@ -305,6 +305,15 @@ function TH:OnEvent(event, ...)
             local name = strsplit("-", sender)
             self:AddToQueue(name, request)
         end
+    elseif (event == "CHAT_MSG_PARTY" or event == "CHAT_MSG_PARTY_LEADER") then
+        if MageToolsDB.listenPartyChat then
+            local msg, sender = ...
+            local request = self:MatchKeyword(msg)
+            if request then
+                local name = strsplit("-", sender)
+                self:AddToQueue(name, request)
+            end
+        end
     elseif event == "TRADE_SHOW" then
         -- Trade window opened — if we have a pending trade, place items
         if pendingTrade and MageToolsDB.autoPlaceItems then
@@ -329,4 +338,4 @@ function TH:OnEvent(event, ...)
     end
 end
 
-MT:RegisterEvents("CHAT_MSG_WHISPER", "TRADE_SHOW", "TRADE_CLOSED", "UI_INFO_MESSAGE")
+MT:RegisterEvents("CHAT_MSG_WHISPER", "CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "TRADE_SHOW", "TRADE_CLOSED", "UI_INFO_MESSAGE")

@@ -357,6 +357,8 @@ local function BuildTradeContent(parent)
     y = CreateHeader(parent, "Auto-Reply", y)
     y = CreateCheckbox(parent, "Enable Auto-Reply", "autoReply", y)
 
+    y = CreateCheckbox(parent, "Listen for Party Chat Requests", "listenPartyChat", y)
+
     -- Whisper Keywords section
     y = CreateKeywordEditor(parent, y - 6)
 

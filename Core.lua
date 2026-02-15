@@ -33,6 +33,7 @@ local defaults = {
     popupColumns = 5,
     popupCloseOnCast = true,
     autoPlaceItems = true,
+    listenPartyChat = false,
     popupButtonSize = 36,
     maxQueueDisplay = 10,
     popupBgAlpha = 0.85,
