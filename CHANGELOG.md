@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.1.0
+- Add party chat detection for food/water requests (opt-in toggle in Trade Helper settings)
+
 ## v2.0.5
 - Fix HUD showing wrong mana gem/food/water icon — now matches what's actually in your bags
 

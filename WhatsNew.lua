@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.1.0",
+        features = {
+            "Party chat detection — party members can request food/water via chat keywords (enable in Trade Helper settings)",
+        },
+        fixes = {},
+    },
+    {
         version = "2.0.5",
         features = {},
         fixes = {
