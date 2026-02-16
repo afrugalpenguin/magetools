@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.2.3",
+        features = {},
+        fixes = {
+            "Fix popup Show/Hide/position blocked in combat",
+        },
+    },
+    {
         version = "2.2.2",
         features = {},
         fixes = {

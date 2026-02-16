@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.2.3
+- Fix popup Show/Hide/position blocked in combat (use secure frame operations)
+
 ## v2.2.2
 - Fix mana gem delete not working in release-to-cast mode
 
