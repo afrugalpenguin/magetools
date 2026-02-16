@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.2.1
+- Popup menu now works in combat (armor buffs, etc.)
+- Add Theramore (Alliance) and Stonard (Horde) teleport and portal spells
+
 ## v2.2.0
 - Smart gem conjure: auto-deletes existing mana gem before conjuring a new one (both click and release-to-cast modes)
 - Popup category toggles: hide/show Buffs, Food/Water, Gems, Teleports, or Portals in Options

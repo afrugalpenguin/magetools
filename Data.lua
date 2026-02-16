@@ -6,11 +6,13 @@ MT.TELEPORTS = {
     { spellID = 3562,  name = "Ironforge",    faction = "Alliance" },
     { spellID = 3565,  name = "Darnassus",    faction = "Alliance" },
     { spellID = 32271, name = "Exodar",       faction = "Alliance" },
+    { spellID = 49359, name = "Theramore",   faction = "Alliance" },
     -- Horde
     { spellID = 3567,  name = "Orgrimmar",    faction = "Horde" },
     { spellID = 3563,  name = "Undercity",    faction = "Horde" },
     { spellID = 3566,  name = "Thunder Bluff", faction = "Horde" },
     { spellID = 32272, name = "Silvermoon",   faction = "Horde" },
+    { spellID = 49358, name = "Stonard",     faction = "Horde" },
     -- Shattrath (faction-specific spell IDs)
     { spellID = 33690, name = "Shattrath",    faction = "Alliance" },
     { spellID = 35715, name = "Shattrath",    faction = "Horde" },
@@ -22,11 +24,13 @@ MT.PORTALS = {
     { spellID = 11416, name = "Ironforge",    faction = "Alliance" },
     { spellID = 11419, name = "Darnassus",    faction = "Alliance" },
     { spellID = 32266, name = "Exodar",       faction = "Alliance" },
+    { spellID = 49360, name = "Theramore",   faction = "Alliance" },
     -- Horde
     { spellID = 11417, name = "Orgrimmar",    faction = "Horde" },
     { spellID = 11418, name = "Undercity",    faction = "Horde" },
     { spellID = 11420, name = "Thunder Bluff", faction = "Horde" },
     { spellID = 32267, name = "Silvermoon",   faction = "Horde" },
+    { spellID = 49361, name = "Stonard",     faction = "Horde" },
     -- Shattrath (faction-specific spell IDs)
     { spellID = 33691, name = "Shattrath",    faction = "Alliance" },
     { spellID = 35717, name = "Shattrath",    faction = "Horde" },

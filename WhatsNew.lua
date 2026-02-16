@@ -6,6 +6,14 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.2.1",
+        features = {
+            "Popup menu now works in combat (armor buffs, etc.)",
+            "Added Theramore and Stonard teleport/portal spells",
+        },
+        fixes = {},
+    },
+    {
         version = "2.2.0",
         features = {
             "Smart gem conjure — auto-deletes existing mana gem before conjuring a new one",

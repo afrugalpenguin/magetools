@@ -91,20 +91,11 @@ function PM:CreateToggleButton()
         FindAndDeleteManaGem()
     end
 
-    -- Hide popup after release-mode cast (runs AFTER template processes the click)
-    toggleBtn:SetScript("PostClick", function(self)
-        if self:GetAttribute("mgtcastpending") then
-            self:SetAttribute("mgtcastpending", nil)
-            if popup and popup:IsShown() then
-                popup:Hide()
-            end
-        end
-    end)
-
     -- WrapScript pre-handler: runs in secure env BEFORE SecureActionButtonTemplate processes click.
     -- Uses "popupopen" attribute for state (works for both keyboard hold-release and mouse two-press).
-    -- IMPORTANT: Do NOT call MGT_HidePopup when casting — that triggers OnHide which clears
-    -- type/spell via insecure SetAttribute before the template can process them. PostClick handles it.
+    -- IMPORTANT: NO CallMethod in the cast branch — any insecure code execution there
+    -- causes taint that prevents the spell from casting in combat.
+    -- Instead, UNIT_SPELLCAST_SUCCEEDED hides the popup after the cast completes.
     SecureHandlerWrapScript(toggleBtn, "OnClick", toggleBtn, [[
         -- Clear stale cast attributes so template doesn't act on previous state
         self:SetAttribute("type", nil)
@@ -126,10 +117,8 @@ function PM:CreateToggleButton()
             self:CallMethod("MGT_ShowPopup")
         elseif sp then
             -- Second press (or key-up after hover): cast spell
-            if self:GetAttribute("mgtdelgem") then
-                self:CallMethod("MGT_DeleteGem")
-                self:SetAttribute("mgtdelgem", nil)
-            end
+            -- No CallMethod here! Insecure code in the cast path taints combat casts.
+            -- Popup hide is handled by UNIT_SPELLCAST_SUCCEEDED event instead.
             self:SetAttribute("popupopen", nil)
             self:SetAttribute("mgtcastpending", 1)
             self:SetAttribute("pressAndHoldAction", 1)
@@ -173,15 +162,19 @@ function PM:CreatePopup()
     popup:SetBackdrop(nil)
 
     popup:SetScript("OnHide", function()
-        PM:ApplyKeybind()
-        -- Clear release-mode state so next open starts fresh
-        if toggleBtn then
-            toggleBtn:SetAttribute("type", nil)
-            toggleBtn:SetAttribute("spell", nil)
-            toggleBtn:SetAttribute("mgtspell", nil)
-            toggleBtn:SetAttribute("popupopen", nil)
-            toggleBtn:SetAttribute("mgtcastpending", nil)
-            toggleBtn:SetAttribute("mgtdelgem", nil)
+        -- In combat, SetAttribute on protected toggleBtn is blocked;
+        -- PLAYER_REGEN_ENABLED will handle deferred cleanup instead.
+        if not InCombatLockdown() then
+            PM:ApplyKeybind()
+            -- Clear release-mode state so next open starts fresh
+            if toggleBtn then
+                toggleBtn:SetAttribute("type", nil)
+                toggleBtn:SetAttribute("spell", nil)
+                toggleBtn:SetAttribute("mgtspell", nil)
+                toggleBtn:SetAttribute("popupopen", nil)
+                toggleBtn:SetAttribute("mgtcastpending", nil)
+                toggleBtn:SetAttribute("mgtdelgem", nil)
+            end
         end
     end)
 
@@ -467,7 +460,27 @@ function PM:OnEvent(event, ...)
         if popup then
             self:BuildButtons()
         end
+    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
+        local unit = ...
+        -- Hide popup after a release-mode cast (mgtcastpending flag).
+        -- This avoids CallMethod in the cast path which taints combat casts.
+        if unit == "player" and popup and popup:IsShown()
+           and toggleBtn and toggleBtn:GetAttribute("mgtcastpending") then
+            popup:Hide()
+        end
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        -- Deferred cleanup after combat ends (handles cases where OnHide
+        -- couldn't clear protected attributes during combat lockdown)
+        if toggleBtn and not popup:IsShown() then
+            toggleBtn:SetAttribute("type", nil)
+            toggleBtn:SetAttribute("spell", nil)
+            toggleBtn:SetAttribute("mgtspell", nil)
+            toggleBtn:SetAttribute("popupopen", nil)
+            toggleBtn:SetAttribute("mgtcastpending", nil)
+            toggleBtn:SetAttribute("mgtdelgem", nil)
+        end
+        PM:ApplyKeybind()
     end
 end
 
-MT:RegisterEvents("SPELLS_CHANGED")
+MT:RegisterEvents("SPELLS_CHANGED", "UNIT_SPELLCAST_SUCCEEDED", "PLAYER_REGEN_ENABLED")
