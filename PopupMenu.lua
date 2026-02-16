@@ -463,10 +463,15 @@ function PM:OnEvent(event, ...)
     elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
         local unit = ...
         -- Hide popup after a release-mode cast (mgtcastpending flag).
+        -- Also delete existing mana gem if this was a gem conjure.
         -- This avoids CallMethod in the cast path which taints combat casts.
-        if unit == "player" and popup and popup:IsShown()
-           and toggleBtn and toggleBtn:GetAttribute("mgtcastpending") then
-            popup:Hide()
+        if unit == "player" and toggleBtn and toggleBtn:GetAttribute("mgtcastpending") then
+            if toggleBtn:GetAttribute("mgtdelgem") then
+                FindAndDeleteManaGem()
+            end
+            if popup and popup:IsShown() then
+                popup:Hide()
+            end
         end
     elseif event == "PLAYER_REGEN_ENABLED" then
         -- Deferred cleanup after combat ends (handles cases where OnHide
