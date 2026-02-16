@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.2.2
+- Fix mana gem delete not working in release-to-cast mode
+
 ## v2.2.1
 - Popup menu now works in combat (armor buffs, etc.)
 - Add Theramore (Alliance) and Stonard (Horde) teleport and portal spells

@@ -1,6 +1,6 @@
 MageTools = {}
 MageTools.modules = {}
-MageTools.version = "2.2.1"
+MageTools.version = "2.2.2"
 
 -- Make a child frame propagate drag events to its movable parent
 function MageTools:PropagateDrag(child)

@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.2.2",
+        features = {},
+        fixes = {
+            "Fix mana gem delete not working in release-to-cast mode",
+        },
+    },
+    {
         version = "2.2.1",
         features = {
             "Popup menu now works in combat (armor buffs, etc.)",
