@@ -50,7 +50,7 @@ BINDING_HEADER_MAGETOOLS = "MageTools"
 BINDING_NAME_MAGETOOLS_POPUP = "Toggle Portal Menu"
 
 function MageTools_TogglePopup()
-    if not popup then return end
+    if not popup or InCombatLockdown() then return end
     if popup:IsShown() then
         popup:Hide()
     else
@@ -65,37 +65,35 @@ function PM:Init()
     self:UpdateReleaseMode()
     self:CreatePopup()
     self:ApplyKeybind()
+    self:UpdateCloseOnCast()
 end
 
 function PM:CreateToggleButton()
     toggleBtn = CreateFrame("Button", "MageToolsPopupToggle", UIParent, "SecureActionButtonTemplate")
+    -- Register combat state attribute driver (SecureActionButtonTemplate supports this)
+    RegisterAttributeDriver(toggleBtn, "state-combat", "[combat] 1; nil")
     toggleBtn:SetSize(1, 1)
     toggleBtn:SetPoint("TOPLEFT", UIParent, "TOPLEFT", -100, 100)
     toggleBtn:RegisterForClicks("AnyDown", "AnyUp")
 
     -- Insecure methods called from secure WrapScript via CallMethod
-    function toggleBtn:MGT_ShowPopup()
-        if popup and not popup:IsShown() then
-            PM:ShowAtCursor()
-        end
-    end
-    function toggleBtn:MGT_HidePopup()
-        if popup and popup:IsShown() then
-            popup:Hide()
-        end
-    end
-    function toggleBtn:MGT_TogglePopup()
-        MageTools_TogglePopup()
-    end
     function toggleBtn:MGT_DeleteGem()
         FindAndDeleteManaGem()
     end
+    -- Position popup at cursor (insecure — only called out of combat)
+    function toggleBtn:MGT_PositionPopup()
+        if popup then
+            popup:ClearAllPoints()
+            local x, y = GetCursorPosition()
+            local scale = UIParent:GetEffectiveScale()
+            popup:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x / scale, y / scale)
+        end
+    end
 
     -- WrapScript pre-handler: runs in secure env BEFORE SecureActionButtonTemplate processes click.
+    -- self = owner = toggleBtn (SecureActionButtonTemplate supports frame refs and attribute drivers).
     -- Uses "popupopen" attribute for state (works for both keyboard hold-release and mouse two-press).
-    -- IMPORTANT: NO CallMethod in the cast branch — any insecure code execution there
-    -- causes taint that prevents the spell from casting in combat.
-    -- Instead, UNIT_SPELLCAST_SUCCEEDED hides the popup after the cast completes.
+    -- All Show/Hide/position calls go through the secure popup frame ref so they work in combat.
     SecureHandlerWrapScript(toggleBtn, "OnClick", toggleBtn, [[
         -- Clear stale cast attributes so template doesn't act on previous state
         self:SetAttribute("type", nil)
@@ -104,9 +102,21 @@ function PM:CreateToggleButton()
         local rm = self:GetAttribute("releasemode")
         local sp = self:GetAttribute("mgtspell")
         local isOpen = self:GetAttribute("popupopen")
+        local p = self:GetFrameRef("popup")
 
         if not rm then
-            self:CallMethod("MGT_TogglePopup")
+            -- Toggle mode: show/hide popup directly from secure code
+            if p:IsShown() then
+                p:Hide()
+            else
+                if not self:GetAttribute("state-combat") then
+                    self:CallMethod("MGT_PositionPopup")
+                else
+                    p:ClearAllPoints()
+                    p:SetPoint("CENTER")
+                end
+                p:Show()
+            end
             return
         end
 
@@ -114,13 +124,23 @@ function PM:CreateToggleButton()
             -- First press (or key-down): show popup
             self:SetAttribute("mgtspell", nil)
             self:SetAttribute("popupopen", 1)
-            self:CallMethod("MGT_ShowPopup")
+            if not self:GetAttribute("state-combat") then
+                self:CallMethod("MGT_PositionPopup")
+            else
+                p:ClearAllPoints()
+                p:SetPoint("CENTER")
+            end
+            p:Show()
         elseif sp then
             -- Second press (or key-up after hover): cast spell
-            -- No CallMethod here! Insecure code in the cast path taints combat casts.
-            -- Popup hide is handled by UNIT_SPELLCAST_SUCCEEDED event instead.
+            -- Delete existing gem BEFORE cast (bag ops only, no frame modifications).
+            -- Gem conjure can't be cast in combat so taint is irrelevant here.
+            if self:GetAttribute("mgtdelgem") then
+                self:CallMethod("MGT_DeleteGem")
+                self:SetAttribute("mgtdelgem", nil)
+            end
             self:SetAttribute("popupopen", nil)
-            self:SetAttribute("mgtcastpending", 1)
+            p:Hide()
             self:SetAttribute("pressAndHoldAction", 1)
             self:SetAttribute("type", "spell")
             self:SetAttribute("typerelease", "spell")
@@ -129,7 +149,7 @@ function PM:CreateToggleButton()
         else
             -- Second press (or key-up) without hover: cancel
             self:SetAttribute("popupopen", nil)
-            self:CallMethod("MGT_HidePopup")
+            p:Hide()
         end
     ]])
 end
@@ -161,6 +181,9 @@ function PM:CreatePopup()
 
     popup:SetBackdrop(nil)
 
+    -- Register popup as a frame ref so secure handlers can Show/Hide/position it
+    SecureHandlerSetFrameRef(toggleBtn, "popup", popup)
+
     popup:SetScript("OnHide", function()
         -- In combat, SetAttribute on protected toggleBtn is blocked;
         -- PLAYER_REGEN_ENABLED will handle deferred cleanup instead.
@@ -172,7 +195,6 @@ function PM:CreatePopup()
                 toggleBtn:SetAttribute("spell", nil)
                 toggleBtn:SetAttribute("mgtspell", nil)
                 toggleBtn:SetAttribute("popupopen", nil)
-                toggleBtn:SetAttribute("mgtcastpending", nil)
                 toggleBtn:SetAttribute("mgtdelgem", nil)
             end
         end
@@ -260,12 +282,15 @@ local function CreateSpellButton(spell, prefix, index, isGemConjure)
         end)
     end
 
-    -- Close popup after direct-click cast (click mode)
-    btn:SetScript("PostClick", function()
-        if MageToolsDB.popupCloseOnCast then
-            popup:Hide()
+    -- Close popup after direct-click cast (secure post-handler, works in combat)
+    SecureHandlerWrapScript(btn, "OnClick", toggleBtn, "", [[
+        if owner:GetAttribute("closeOnCast") then
+            local p = owner:GetFrameRef("popup")
+            if p and p:IsShown() then
+                p:Hide()
+            end
         end
-    end)
+    ]])
 
     MT.Masque:AddButton("Popup", btn, {
         Icon = iconTex,
@@ -440,6 +465,7 @@ function PM:BuildButtons()
 end
 
 function PM:ShowAtCursor()
+    if InCombatLockdown() then return end
     local x, y = GetCursorPosition()
     local scale = UIParent:GetEffectiveScale()
     x, y = x / scale, y / scale
@@ -447,6 +473,12 @@ function PM:ShowAtCursor()
     popup:ClearAllPoints()
     popup:SetPoint("CENTER", UIParent, "BOTTOMLEFT", x, y)
     popup:Show()
+end
+
+function PM:UpdateCloseOnCast()
+    if toggleBtn then
+        toggleBtn:SetAttribute("closeOnCast", MageToolsDB.popupCloseOnCast and true or nil)
+    end
 end
 
 function PM:Rebuild()
@@ -460,19 +492,6 @@ function PM:OnEvent(event, ...)
         if popup then
             self:BuildButtons()
         end
-    elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
-        local unit = ...
-        -- Hide popup after a release-mode cast (mgtcastpending flag).
-        -- Also delete existing mana gem if this was a gem conjure.
-        -- This avoids CallMethod in the cast path which taints combat casts.
-        if unit == "player" and toggleBtn and toggleBtn:GetAttribute("mgtcastpending") then
-            if toggleBtn:GetAttribute("mgtdelgem") then
-                FindAndDeleteManaGem()
-            end
-            if popup and popup:IsShown() then
-                popup:Hide()
-            end
-        end
     elseif event == "PLAYER_REGEN_ENABLED" then
         -- Deferred cleanup after combat ends (handles cases where OnHide
         -- couldn't clear protected attributes during combat lockdown)
@@ -481,11 +500,10 @@ function PM:OnEvent(event, ...)
             toggleBtn:SetAttribute("spell", nil)
             toggleBtn:SetAttribute("mgtspell", nil)
             toggleBtn:SetAttribute("popupopen", nil)
-            toggleBtn:SetAttribute("mgtcastpending", nil)
             toggleBtn:SetAttribute("mgtdelgem", nil)
         end
         PM:ApplyKeybind()
     end
 end
 
-MT:RegisterEvents("SPELLS_CHANGED", "UNIT_SPELLCAST_SUCCEEDED", "PLAYER_REGEN_ENABLED")
+MT:RegisterEvents("SPELLS_CHANGED", "PLAYER_REGEN_ENABLED")

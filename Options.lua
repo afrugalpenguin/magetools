@@ -345,7 +345,10 @@ local function BuildGeneralContent(parent)
         local pm = MageTools.modules["PopupMenu"]
         if pm then pm:UpdateReleaseMode() end
     end)
-    y = CreateCheckbox(parent, "Close Popup on Cast", "popupCloseOnCast", y)
+    y = CreateCheckbox(parent, "Close Popup on Cast", "popupCloseOnCast", y, function()
+        local pm = MageTools.modules["PopupMenu"]
+        if pm then pm:UpdateCloseOnCast() end
+    end)
 
     -- Popup Categories section
     y = CreateHeader(parent, "Popup Categories", y - 6)

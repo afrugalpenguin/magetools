@@ -21,6 +21,8 @@ read_globals = {
     "InterfaceOptionsFrame_OpenToCategory",
     "InterfaceOptions_AddCategory",
     "SecureHandlerWrapScript",
+    "SecureHandlerSetFrameRef",
+    "RegisterAttributeDriver",
     "SetOverrideBindingClick",
     "ClearOverrideBindings",
     "hooksecurefunc",
