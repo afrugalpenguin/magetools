@@ -6,6 +6,14 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.3.0",
+        features = {
+            "Teleport/portal reagent counts on HUD (Rune of Teleportation, Rune of Portals)",
+            "Toggle reagent display on/off in Options",
+        },
+        fixes = {},
+    },
+    {
         version = "2.2.3",
         features = {},
         fixes = {

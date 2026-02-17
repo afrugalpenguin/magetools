@@ -4,8 +4,8 @@ MT:RegisterModule("ConjureManager", CM)
 
 local hudFrame = nil
 local sessionFrame = nil
-local counts = { food = 0, water = 0, gem = 0 }
-local foundItem = { food = nil, water = nil, gem = nil }
+local counts = { food = 0, water = 0, gem = 0, teleportRune = 0, portalRune = 0 }
+local foundItem = { food = nil, water = nil, gem = nil, teleportRune = nil, portalRune = nil }
 local hudButtons = {}
 
 function CM:Init()
@@ -24,9 +24,13 @@ function CM:ScanBags()
     counts.food = 0
     counts.water = 0
     counts.gem = 0
+    counts.teleportRune = 0
+    counts.portalRune = 0
     foundItem.food = nil
     foundItem.water = nil
     foundItem.gem = nil
+    foundItem.teleportRune = nil
+    foundItem.portalRune = nil
     for bag = 0, NUM_BAG_SLOTS do
         local numSlots = C_Container.GetContainerNumSlots(bag)
         for slot = 1, numSlots do
@@ -70,11 +74,7 @@ function CM:CreateHUD()
     hudFrame = CreateFrame("Frame", "MageToolsHUD", UIParent, "BackdropTemplate")
     local btnSize = MageToolsDB.hudButtonSize
     local vertical = MageToolsDB.hudVertical
-    if vertical then
-        hudFrame:SetSize(btnSize + 16, (btnSize * 3) + 16)
-    else
-        hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
-    end
+    hudFrame:SetSize(btnSize + 16, btnSize + 16) -- temporary; resized after buttons
     hudFrame:SetPoint(
         MageToolsDB.hudPoint or "CENTER",
         UIParent,
@@ -105,18 +105,17 @@ function CM:CreateHUD()
         { type = "gem",   items = MT.MANA_GEMS },
         { type = "food",  items = MT.CONJURED_FOOD },
         { type = "water", items = MT.CONJURED_WATER },
+        { type = "teleportRune", itemID = MT.RUNE_OF_TELEPORTATION, reagent = true },
+        { type = "portalRune",   itemID = MT.RUNE_OF_PORTALS,       reagent = true },
     }
 
-    for i, cat in ipairs(categories) do
+    local visIndex = 0
+    for _, cat in ipairs(categories) do
+        local defaultID = cat.itemID or cat.items[1]
         local btn = CreateFrame("Button", "MageToolsHUD" .. cat.type, hudFrame)
         btn:SetSize(btnSize, btnSize)
-        if vertical then
-            btn:SetPoint("TOP", hudFrame, "TOP", 0, -8 - ((i - 1) * (btnSize + 2)))
-        else
-            btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
-        end
 
-        local iconPath = GetItemIcon(cat.items[1])
+        local iconPath = GetItemIcon(defaultID)
         local iconTex = btn:CreateTexture(nil, "BACKGROUND")
         iconTex:SetAllPoints()
         if iconPath then iconTex:SetTexture(iconPath) end
@@ -133,7 +132,8 @@ function CM:CreateHUD()
         countText:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
         btn.countText = countText
         btn.itemType = cat.type
-        btn.defaultItemID = cat.items[1]
+        btn.defaultItemID = defaultID
+        btn.isReagent = cat.reagent or false
 
         MT.Masque:AddButton("HUD", btn, {
             Icon = iconTex,
@@ -142,7 +142,29 @@ function CM:CreateHUD()
 
         MT:PropagateDrag(btn)
         tinsert(hudButtons, btn)
+
+        -- Hide reagent buttons if setting is off
+        if btn.isReagent and not MageToolsDB.hudShowReagents then
+            btn:Hide()
+        else
+            visIndex = visIndex + 1
+            btn:ClearAllPoints()
+            if vertical then
+                btn:SetPoint("TOP", hudFrame, "TOP", 0, -8 - ((visIndex - 1) * (btnSize + 2)))
+            else
+                btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((visIndex - 1) * (btnSize + 2)), 0)
+            end
+        end
     end
+
+    -- Size frame to visible buttons
+    local numVisible = visIndex
+    if vertical then
+        hudFrame:SetSize(btnSize + 16, (btnSize * numVisible) + ((numVisible - 1) * 2) + 16)
+    else
+        hudFrame:SetSize((btnSize * numVisible) + ((numVisible - 1) * 2) + 16, btnSize + 16)
+    end
+
     MT.Masque:ReSkin("HUD")
 end
 
@@ -162,19 +184,29 @@ function CM:RebuildHUD()
     if not hudFrame then return end
     local btnSize = MageToolsDB.hudButtonSize
     local vertical = MageToolsDB.hudVertical
-    if vertical then
-        hudFrame:SetSize(btnSize + 16, (btnSize * 3) + 16)
-    else
-        hudFrame:SetSize((btnSize * 3) + 16, btnSize + 16)
-    end
-    for i, btn in ipairs(hudButtons) do
+    local showReagents = MageToolsDB.hudShowReagents
+
+    local visIndex = 0
+    for _, btn in ipairs(hudButtons) do
         btn:SetSize(btnSize, btnSize)
         btn:ClearAllPoints()
-        if vertical then
-            btn:SetPoint("TOP", hudFrame, "TOP", 0, -8 - ((i - 1) * (btnSize + 2)))
+        if btn.isReagent and not showReagents then
+            btn:Hide()
         else
-            btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((i - 1) * (btnSize + 2)), 0)
+            btn:Show()
+            visIndex = visIndex + 1
+            if vertical then
+                btn:SetPoint("TOP", hudFrame, "TOP", 0, -8 - ((visIndex - 1) * (btnSize + 2)))
+            else
+                btn:SetPoint("LEFT", hudFrame, "LEFT", 8 + ((visIndex - 1) * (btnSize + 2)), 0)
+            end
         end
+    end
+
+    if vertical then
+        hudFrame:SetSize(btnSize + 16, (btnSize * visIndex) + ((visIndex - 1) * 2) + 16)
+    else
+        hudFrame:SetSize((btnSize * visIndex) + ((visIndex - 1) * 2) + 16, btnSize + 16)
     end
 end
 

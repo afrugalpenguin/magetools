@@ -1,6 +1,6 @@
 MageTools = {}
 MageTools.modules = {}
-MageTools.version = "2.2.3"
+MageTools.version = "2.3.0"
 
 -- Make a child frame propagate drag events to its movable parent
 function MageTools:PropagateDrag(child)
@@ -40,6 +40,7 @@ local defaults = {
     sessionBgAlpha = 0.9,
     showSessionOnLogin = false,
     popupKeybind = nil,
+    hudShowReagents = true,
     popupReleaseMode = true,
     popupCategories = { buffs = true, conjureFood = true, conjureGems = true, teleports = true, portals = true },
 }

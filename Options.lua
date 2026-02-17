@@ -327,6 +327,10 @@ local function BuildGeneralContent(parent)
         local cm = MT.modules["ConjureManager"]
         if cm and cm.RebuildHUD then cm:RebuildHUD() end
     end)
+    y = CreateCheckbox(parent, "Show Reagents on HUD", "hudShowReagents", y, function()
+        local cm = MT.modules["ConjureManager"]
+        if cm and cm.RebuildHUD then cm:RebuildHUD() end
+    end)
     y = y - 6
     y = CreateSlider(parent, "HUD Button Size", "hudButtonSize", 24, 48, 2, y, function()
         local cm = MT.modules["ConjureManager"]

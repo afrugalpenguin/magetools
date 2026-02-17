@@ -74,8 +74,14 @@ MT.CONJURE_FOOD_SPELL = 33717  -- Conjure Food Rank 8
 MT.CONJURE_WATER_SPELL = 27090 -- Conjure Water Rank 9
 MT.CONJURE_GEM_SPELL = 27101   -- Conjure Mana Emerald
 
+-- Reagent item IDs
+MT.RUNE_OF_TELEPORTATION = 17031
+MT.RUNE_OF_PORTALS = 17032
+
 -- Build a lookup set of all conjured item IDs for fast bag scanning
 MT.CONJURED_ITEM_SET = {}
 for _, id in ipairs(MT.CONJURED_FOOD) do MT.CONJURED_ITEM_SET[id] = "food" end
 for _, id in ipairs(MT.CONJURED_WATER) do MT.CONJURED_ITEM_SET[id] = "water" end
 for _, id in ipairs(MT.MANA_GEMS) do MT.CONJURED_ITEM_SET[id] = "gem" end
+MT.CONJURED_ITEM_SET[MT.RUNE_OF_TELEPORTATION] = "teleportRune"
+MT.CONJURED_ITEM_SET[MT.RUNE_OF_PORTALS] = "portalRune"

@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.3.0
+- Add teleport/portal reagent counts (Rune of Teleportation, Rune of Portals) to HUD
+- Add "Show Reagents on HUD" toggle in Options
+
 ## v2.2.3
 - Fix popup Show/Hide/position blocked in combat (use secure frame operations)
 
