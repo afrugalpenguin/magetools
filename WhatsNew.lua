@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.4.1",
+        features = {},
+        fixes = {
+            "Fix error on non-mage characters",
+        },
+    },
+    {
         version = "2.4.0",
         features = {
             "Ritual of Refreshment (Refreshment Table) in popup conjure section",

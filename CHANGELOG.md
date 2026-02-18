@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.4.1
+- Fix error on non-mage characters (move event registration into Init, guard event dispatch)
+
 ## v2.4.0
 - Add Ritual of Refreshment (Refreshment Table) to popup conjure section
 
