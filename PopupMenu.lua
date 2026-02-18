@@ -66,6 +66,7 @@ function PM:Init()
     self:CreatePopup()
     self:ApplyKeybind()
     self:UpdateCloseOnCast()
+    MT:RegisterEvents("SPELLS_CHANGED", "PLAYER_REGEN_ENABLED")
 end
 
 function PM:CreateToggleButton()
@@ -505,5 +506,3 @@ function PM:OnEvent(event, ...)
         PM:ApplyKeybind()
     end
 end
-
-MT:RegisterEvents("SPELLS_CHANGED", "PLAYER_REGEN_ENABLED")

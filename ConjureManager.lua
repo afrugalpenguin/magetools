@@ -17,6 +17,7 @@ function CM:Init()
     else
         hudFrame:Hide()
     end
+    MT:RegisterEvents("BAG_UPDATE", "BAG_UPDATE_DELAYED", "PLAYER_ENTERING_WORLD")
 end
 
 -- Bag scanning
@@ -348,5 +349,3 @@ function CM:OnEvent(event, ...)
         end
     end
 end
-
-MT:RegisterEvents("BAG_UPDATE", "BAG_UPDATE_DELAYED", "PLAYER_ENTERING_WORLD")

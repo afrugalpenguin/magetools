@@ -10,6 +10,7 @@ local pendingTrade = nil  -- name of player we're trying to trade with
 function TH:Init()
     self:CreateQueueFrame()
     self:UpdateQueueDisplay()
+    MT:RegisterEvents("CHAT_MSG_WHISPER", "CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "TRADE_SHOW", "TRADE_CLOSED", "UI_INFO_MESSAGE")
 end
 
 function TH:GetQueueSize()
@@ -337,5 +338,3 @@ function TH:OnEvent(event, ...)
         pendingTrade = nil
     end
 end
-
-MT:RegisterEvents("CHAT_MSG_WHISPER", "CHAT_MSG_PARTY", "CHAT_MSG_PARTY_LEADER", "TRADE_SHOW", "TRADE_CLOSED", "UI_INFO_MESSAGE")

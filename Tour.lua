@@ -387,9 +387,8 @@ function Tour:OnEvent(event, ...)
     end
 end
 
-MT:RegisterEvents("PLAYER_REGEN_DISABLED")
-
 function Tour:Init()
+    MT:RegisterEvents("PLAYER_REGEN_DISABLED")
     if not MageToolsDB.tourVersion or MageToolsDB.tourVersion < TOUR_VERSION then
         -- Suppress conjure session on login so it doesn't compete with the tour
         MageToolsDB.showSessionOnLogin = false
