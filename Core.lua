@@ -1,6 +1,7 @@
 MageTools = {}
 MageTools.modules = {}
-MageTools.version = "2.4.0"
+MageTools.version = "2.4.1"
+MageTools.initialized = false
 
 -- Make a child frame propagate drag events to its movable parent
 function MageTools:PropagateDrag(child)
@@ -89,10 +90,12 @@ frame:SetScript("OnEvent", function(self, event, ...)
                     mod:Init()
                 end
             end
+            MageTools.initialized = true
             self:UnregisterEvent("ADDON_LOADED")
         end
         return
     end
+    if not MageTools.initialized then return end
     for name, mod in pairs(MageTools.modules) do
         if mod.OnEvent then
             mod:OnEvent(event, ...)
