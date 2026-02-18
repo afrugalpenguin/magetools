@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.4.0",
+        features = {
+            "Ritual of Refreshment (Refreshment Table) in popup conjure section",
+        },
+        fixes = {},
+    },
+    {
         version = "2.3.0",
         features = {
             "Teleport/portal reagent counts on HUD (Rune of Teleportation, Rune of Portals)",

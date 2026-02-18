@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.4.0
+- Add Ritual of Refreshment (Refreshment Table) to popup conjure section
+
 ## v2.3.0
 - Add teleport/portal reagent counts (Rune of Teleportation, Rune of Portals) to HUD
 - Add "Show Reagents on HUD" toggle in Options
