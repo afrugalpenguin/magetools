@@ -333,7 +333,7 @@ function PM:BuildButtons()
     local conjureFoodWater = {}
     local conjureGems = {}
     if cats.conjureFood then
-        for _, name in ipairs({"Conjure Food", "Conjure Water"}) do
+        for _, name in ipairs({"Conjure Food", "Conjure Water", "Ritual of Refreshment"}) do
             local id = FindSpellInBook(name)
             if id then tinsert(conjureFoodWater, { spellID = id }) end
         end
