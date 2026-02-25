@@ -42,6 +42,7 @@ local defaults = {
     showSessionOnLogin = false,
     popupKeybind = nil,
     hudShowReagents = true,
+    hudHideInCombat = false,
     popupReleaseMode = true,
     popupCategories = { buffs = true, conjureFood = true, conjureGems = true, teleports = true, portals = true },
 }

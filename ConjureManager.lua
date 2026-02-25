@@ -17,7 +17,8 @@ function CM:Init()
     else
         hudFrame:Hide()
     end
-    MT:RegisterEvents("BAG_UPDATE", "BAG_UPDATE_DELAYED", "PLAYER_ENTERING_WORLD")
+    MT:RegisterEvents("BAG_UPDATE", "BAG_UPDATE_DELAYED", "PLAYER_ENTERING_WORLD",
+        "PLAYER_REGEN_DISABLED", "PLAYER_REGEN_ENABLED")
 end
 
 -- Bag scanning
@@ -346,6 +347,14 @@ function CM:OnEvent(event, ...)
         if isInitialLogin and MageToolsDB.showSessionOnLogin then
             self:UpdateSessionProgress()
             sessionFrame:Show()
+        end
+    elseif event == "PLAYER_REGEN_DISABLED" then
+        if MageToolsDB.hudHideInCombat and MageToolsDB.hudVisible and hudFrame then
+            hudFrame:Hide()
+        end
+    elseif event == "PLAYER_REGEN_ENABLED" then
+        if MageToolsDB.hudHideInCombat and MageToolsDB.hudVisible and hudFrame then
+            hudFrame:Show()
         end
     end
 end
