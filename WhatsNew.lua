@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.5.1",
+        features = {},
+        fixes = {
+            "HUD now shows mana gem charges instead of item count",
+        },
+    },
+    {
         version = "2.5.0",
         features = {
             "Hide HUD in Combat — optional toggle to auto-hide the HUD when entering combat",

@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.5.1
+- Fix HUD showing mana gem item count instead of remaining charges
+
 ## v2.5.0
 - Add "Hide HUD in Combat" option to automatically hide the HUD during combat
 
