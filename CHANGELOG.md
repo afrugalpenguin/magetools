@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.5.0
+- Add "Hide HUD in Combat" option to automatically hide the HUD during combat
+
 ## v2.4.1
 - Fix error on non-mage characters (move event registration into Init, guard event dispatch)
 

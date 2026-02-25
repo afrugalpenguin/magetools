@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.5.0",
+        features = {
+            "Hide HUD in Combat — optional toggle to auto-hide the HUD when entering combat",
+        },
+        fixes = {},
+    },
+    {
         version = "2.4.1",
         features = {},
         fixes = {
