@@ -4,8 +4,8 @@ MT:RegisterModule("ConjureManager", CM)
 
 local hudFrame = nil
 local sessionFrame = nil
-local counts = { food = 0, water = 0, gem = 0, teleportRune = 0, portalRune = 0 }
-local foundItem = { food = nil, water = nil, gem = nil, teleportRune = nil, portalRune = nil }
+local counts = { food = 0, water = 0, gem = 0, biscuit = 0, teleportRune = 0, portalRune = 0 }
+local foundItem = { food = nil, water = nil, gem = nil, biscuit = nil, teleportRune = nil, portalRune = nil }
 local hudButtons = {}
 
 function CM:Init()
@@ -26,11 +26,13 @@ function CM:ScanBags()
     counts.food = 0
     counts.water = 0
     counts.gem = 0
+    counts.biscuit = 0
     counts.teleportRune = 0
     counts.portalRune = 0
     foundItem.food = nil
     foundItem.water = nil
     foundItem.gem = nil
+    foundItem.biscuit = nil
     foundItem.teleportRune = nil
     foundItem.portalRune = nil
     for bag = 0, NUM_BAG_SLOTS do
@@ -61,7 +63,7 @@ function CM:GetCounts()
 end
 
 function CM:UpdateDisplays()
-    -- Update HUD
+    -- Update HUD counts and icons
     for _, btn in ipairs(hudButtons) do
         local count = counts[btn.itemType] or 0
         btn.countText:SetText(count > 0 and count or "0")
@@ -69,6 +71,9 @@ function CM:UpdateDisplays()
         local icon = GetItemIcon(itemID)
         if icon then btn.icon:SetTexture(icon) end
     end
+
+    -- Rebuild layout so biscuit/food/water visibility updates
+    self:RebuildHUD()
 
     -- Update conjure session if open
     if sessionFrame and sessionFrame:IsShown() then
@@ -109,9 +114,10 @@ function CM:CreateHUD()
     hudFrame:SetBackdrop(nil)
 
     local categories = {
-        { type = "gem",   items = MT.MANA_GEMS },
-        { type = "food",  items = MT.CONJURED_FOOD },
-        { type = "water", items = MT.CONJURED_WATER },
+        { type = "gem",      items = MT.MANA_GEMS },
+        { type = "biscuit",  items = MT.CONJURED_BISCUITS },
+        { type = "food",     items = MT.CONJURED_FOOD },
+        { type = "water",    items = MT.CONJURED_WATER },
         { type = "teleportRune", itemID = MT.RUNE_OF_TELEPORTATION, reagent = true },
         { type = "portalRune",   itemID = MT.RUNE_OF_PORTALS,       reagent = true },
     }
@@ -150,8 +156,17 @@ function CM:CreateHUD()
         MT:PropagateDrag(btn)
         tinsert(hudButtons, btn)
 
-        -- Hide reagent buttons if setting is off
+        -- Determine visibility: reagents respect setting, biscuit/food/water are dynamic
+        local hidden = false
         if btn.isReagent and not MageToolsDB.hudShowReagents then
+            hidden = true
+        elseif cat.type == "biscuit" and counts.biscuit == 0 then
+            hidden = true
+        elseif (cat.type == "food" or cat.type == "water") and counts.biscuit > 0 and counts[cat.type] == 0 then
+            hidden = true
+        end
+
+        if hidden then
             btn:Hide()
         else
             visIndex = visIndex + 1
@@ -193,11 +208,22 @@ function CM:RebuildHUD()
     local vertical = MageToolsDB.hudVertical
     local showReagents = MageToolsDB.hudShowReagents
 
+    local hasBiscuits = counts.biscuit > 0
     local visIndex = 0
     for _, btn in ipairs(hudButtons) do
         btn:SetSize(btnSize, btnSize)
         btn:ClearAllPoints()
+
+        local hidden = false
         if btn.isReagent and not showReagents then
+            hidden = true
+        elseif btn.itemType == "biscuit" and not hasBiscuits then
+            hidden = true
+        elseif (btn.itemType == "food" or btn.itemType == "water") and hasBiscuits and counts[btn.itemType] == 0 then
+            hidden = true
+        end
+
+        if hidden then
             btn:Hide()
         else
             btn:Show()

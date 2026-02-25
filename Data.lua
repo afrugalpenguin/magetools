@@ -60,6 +60,9 @@ MT.CONJURED_WATER = {
     5350,  -- Conjured Water (Rank 1)
 }
 
+-- Conjured Mana Biscuit (from Ritual of Refreshment — counts as both food and water)
+MT.CONJURED_BISCUITS = { 34062 }
+
 -- Mana gem item IDs (highest first)
 MT.MANA_GEMS = {
     22044, -- Mana Emerald
@@ -82,6 +85,7 @@ MT.RUNE_OF_PORTALS = 17032
 MT.CONJURED_ITEM_SET = {}
 for _, id in ipairs(MT.CONJURED_FOOD) do MT.CONJURED_ITEM_SET[id] = "food" end
 for _, id in ipairs(MT.CONJURED_WATER) do MT.CONJURED_ITEM_SET[id] = "water" end
+for _, id in ipairs(MT.CONJURED_BISCUITS) do MT.CONJURED_ITEM_SET[id] = "biscuit" end
 for _, id in ipairs(MT.MANA_GEMS) do MT.CONJURED_ITEM_SET[id] = "gem" end
 MT.CONJURED_ITEM_SET[MT.RUNE_OF_TELEPORTATION] = "teleportRune"
 MT.CONJURED_ITEM_SET[MT.RUNE_OF_PORTALS] = "portalRune"

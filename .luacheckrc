@@ -41,6 +41,7 @@ read_globals = {
     "GetSpellBookItemInfo",
     "IsSpellKnown",
     "GetItemIcon",
+    "GetItemCount",
     "GetNumGroupMembers",
     "InCombatLockdown",
     "BOOKTYPE_SPELL",
