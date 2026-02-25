@@ -48,6 +48,11 @@ function CM:ScanBags()
             end
         end
     end
+    -- Override gem count with charges (mana gems don't stack; they have charges)
+    if foundItem.gem then
+        counts.gem = GetItemCount(foundItem.gem, false, true)
+    end
+
     self:UpdateDisplays()
 end
 
