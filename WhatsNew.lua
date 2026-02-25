@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.6.0",
+        features = {
+            "Mana Biscuit detection — HUD shows biscuit count when present, collapsing food/water slots",
+        },
+        fixes = {},
+    },
+    {
         version = "2.5.1",
         features = {},
         fixes = {

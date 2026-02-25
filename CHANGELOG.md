@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.6.0
+- Detect Conjured Mana Biscuits on HUD — biscuit slot appears between gem and food when present
+- Food/water slots auto-hide when empty and biscuits cover both
+
 ## v2.5.1
 - Fix HUD showing mana gem item count instead of remaining charges
 
