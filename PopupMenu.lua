@@ -5,6 +5,7 @@ MT:RegisterModule("PopupMenu", PM)
 local popup = nil
 local buttons = {}
 local labels = {}
+local reagentButtons = {}  -- buttons that show reagent counts
 local BUTTON_PADDING = 4
 local BLOCK_GAP = 6
 local BLOCK_COLS = 99  -- no wrapping, each category stays on one row
@@ -66,7 +67,7 @@ function PM:Init()
     self:CreatePopup()
     self:ApplyKeybind()
     self:UpdateCloseOnCast()
-    MT:RegisterEvents("SPELLS_CHANGED", "PLAYER_REGEN_ENABLED")
+    MT:RegisterEvents("SPELLS_CHANGED", "PLAYER_REGEN_ENABLED", "BAG_UPDATE")
 end
 
 function PM:CreateToggleButton()
@@ -182,6 +183,10 @@ function PM:CreatePopup()
 
     popup:SetBackdrop(nil)
 
+    popup:SetScript("OnShow", function()
+        PM:UpdateReagentCounts()
+    end)
+
     -- Register popup as a frame ref so secure handlers can Show/Hide/position it
     SecureHandlerSetFrameRef(toggleBtn, "popup", popup)
 
@@ -204,7 +209,7 @@ function PM:CreatePopup()
     self:BuildButtons()
 end
 
-local function CreateSpellButton(spell, prefix, index, isGemConjure)
+local function CreateSpellButton(spell, prefix, index, isGemConjure, reagentType)
     local btnSize = MageToolsDB.popupButtonSize
     local btn = CreateFrame("Button", "MageTools" .. prefix .. "Btn" .. index, popup, "SecureActionButtonTemplate")
     btn:SetSize(btnSize, btnSize)
@@ -231,6 +236,16 @@ local function CreateSpellButton(spell, prefix, index, isGemConjure)
     iconTex:SetPoint("BOTTOMRIGHT", -1, 1)
     iconTex:SetTexture(icon)
     btn.icon = iconTex
+
+    -- Reagent count overlay (bottom-right, like standard action button counts)
+    if reagentType then
+        local countText = btn:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
+        countText:SetPoint("BOTTOMRIGHT", btn, "BOTTOMRIGHT", -2, 2)
+        countText:SetJustifyH("RIGHT")
+        btn.reagentCount = countText
+        btn.reagentType = reagentType
+        tinsert(reagentButtons, btn)
+    end
 
     -- Masque skinning
     local normalTex, highlightTex
@@ -304,11 +319,12 @@ local function CreateSpellButton(spell, prefix, index, isGemConjure)
 end
 
 function PM:BuildButtons()
-    -- Clear old buttons and labels
+    -- Clear old buttons, labels, and reagent button refs
     for _, btn in ipairs(buttons) do btn:Hide() end
     wipe(buttons)
     for _, lbl in ipairs(labels) do lbl:Hide() end
     wipe(labels)
+    wipe(reagentButtons)
 
     local cats = MageToolsDB.popupCategories
     local playerFaction = UnitFactionGroup("player")
@@ -378,8 +394,8 @@ function PM:BuildButtons()
     local quadrants = {
         { spells = buffSpells,      prefix = "Buff",     label = "Buffs"     },  -- 1: top-left
         { spells = conjureSpells,   prefix = "Conjure",  label = "Conjure"   },  -- 2: top-right
-        { spells = knownTeleports,  prefix = "Teleport", label = "Teleports" },  -- 3: bottom-left
-        { spells = knownPortals,    prefix = "Portal",   label = "Portals"   },  -- 4: bottom-right
+        { spells = knownTeleports,  prefix = "Teleport", label = "Teleports", reagentType = "teleportRune" },  -- 3: bottom-left
+        { spells = knownPortals,    prefix = "Portal",   label = "Portals",   reagentType = "portalRune"   },  -- 4: bottom-right
     }
 
     local btnSize = MageToolsDB.popupButtonSize
@@ -399,7 +415,7 @@ function PM:BuildButtons()
             local col = 0
             local row = 0
             for i, spell in ipairs(q.spells) do
-                local btn = CreateSpellButton(spell, q.prefix, i, spell.isGem)
+                local btn = CreateSpellButton(spell, q.prefix, i, spell.isGem, q.reagentType)
 
                 local bx, by
                 if qIdx == 1 then       -- top-left
@@ -465,6 +481,21 @@ function PM:BuildButtons()
     end
 end
 
+function PM:UpdateReagentCounts()
+    local CM = MT.modules["ConjureManager"]
+    if not CM then return end
+    local c = CM:GetCounts()
+    for _, btn in ipairs(reagentButtons) do
+        local count = c[btn.reagentType] or 0
+        btn.reagentCount:SetText(count > 0 and count or "0")
+        if count == 0 then
+            btn.reagentCount:SetTextColor(1, 0.1, 0.1)
+        else
+            btn.reagentCount:SetTextColor(1, 1, 1)
+        end
+    end
+end
+
 function PM:ShowAtCursor()
     if InCombatLockdown() then return end
     local x, y = GetCursorPosition()
@@ -492,6 +523,10 @@ function PM:OnEvent(event, ...)
     if event == "SPELLS_CHANGED" then
         if popup then
             self:BuildButtons()
+        end
+    elseif event == "BAG_UPDATE" then
+        if popup and popup:IsShown() then
+            self:UpdateReagentCounts()
         end
     elseif event == "PLAYER_REGEN_ENABLED" then
         -- Deferred cleanup after combat ends (handles cases where OnHide
