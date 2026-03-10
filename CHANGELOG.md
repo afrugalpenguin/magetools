@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.7.0
+- Show reagent counts (Rune of Teleportation / Rune of Portals) on popup menu teleport/portal buttons
+- Count turns red when at zero
+
 ## v2.6.0
 - Detect Conjured Mana Biscuits on HUD — biscuit slot appears between gem and food when present
 - Food/water slots auto-hide when empty and biscuits cover both

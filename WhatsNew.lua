@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.7.0",
+        features = {
+            "Reagent counts on popup menu — teleport/portal buttons now show rune counts, turning red at zero",
+        },
+        fixes = {},
+    },
+    {
         version = "2.6.0",
         features = {
             "Mana Biscuit detection — HUD shows biscuit count when present, collapsing food/water slots",
