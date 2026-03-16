@@ -1,5 +1,8 @@
 # Changelog
 
+## v2.7.1
+- Fix conjured food item IDs — Rank 6 (Conjured Sweet Roll) was not being counted, Ranks 5-8 had incorrect IDs/ordering
+
 ## v2.7.0
 - Show reagent counts (Rune of Teleportation / Rune of Portals) on popup menu teleport/portal buttons
 - Count turns red when at zero

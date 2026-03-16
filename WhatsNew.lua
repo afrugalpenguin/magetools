@@ -6,6 +6,13 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.7.1",
+        features = {},
+        fixes = {
+            "Conjured food item IDs corrected — Rank 6 (Sweet Roll) now counted, Ranks 5-8 ordering fixed",
+        },
+    },
+    {
         version = "2.7.0",
         features = {
             "Reagent counts on popup menu — teleport/portal buttons now show rune counts, turning red at zero",
