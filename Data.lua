@@ -38,13 +38,14 @@ MT.PORTALS = {
 
 -- Conjured food item IDs (all ranks, highest first)
 MT.CONJURED_FOOD = {
-    22895, -- Conjured Cinnamon Roll (Rank 8)
-    22019, -- Conjured Croissant (Rank 7)
-    8075,  -- Conjured Sourdough (Rank 6)
-    1487,  -- Conjured Pumpernickel (Rank 5)
-    1114,  -- Conjured Rye (Rank 4)
-    1113,  -- Conjured Bread (Rank 3)
-    5349,  -- Conjured Muffin (Rank 2)
+    22019, -- Conjured Croissant (Rank 8)
+    22895, -- Conjured Cinnamon Roll (Rank 7)
+    8076,  -- Conjured Sweet Roll (Rank 6)
+    8075,  -- Conjured Sourdough (Rank 5)
+    1487,  -- Conjured Pumpernickel (Rank 4)
+    1114,  -- Conjured Rye (Rank 3)
+    1113,  -- Conjured Bread (Rank 2)
+    5349,  -- Conjured Muffin (Rank 1)
 }
 
 -- Conjured water item IDs (all ranks, highest first)
