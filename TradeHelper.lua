@@ -299,6 +299,7 @@ end
 
 function TH:OnEvent(event, ...)
     if event == "CHAT_MSG_WHISPER" then
+        if not MageToolsDB.tradeHelperEnabled then return end
         local msg, sender = ...
         local request = self:MatchKeyword(msg)
         if request then
@@ -307,6 +308,7 @@ function TH:OnEvent(event, ...)
             self:AddToQueue(name, request)
         end
     elseif (event == "CHAT_MSG_PARTY" or event == "CHAT_MSG_PARTY_LEADER") then
+        if not MageToolsDB.tradeHelperEnabled then return end
         if MageToolsDB.listenPartyChat then
             local msg, sender = ...
             local request = self:MatchKeyword(msg)

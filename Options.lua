@@ -393,8 +393,11 @@ end
 local function BuildTradeContent(parent)
     local y = -8
 
+    y = CreateHeader(parent, "Trade Helper", y)
+    y = CreateCheckbox(parent, "Enable Trade Helper", "tradeHelperEnabled", y)
+
     -- Auto-Reply section
-    y = CreateHeader(parent, "Auto-Reply", y)
+    y = CreateHeader(parent, "Auto-Reply", y - 6)
     y = CreateCheckbox(parent, "Enable Auto-Reply", "autoReply", y)
 
     y = CreateCheckbox(parent, "Listen for Party Chat Requests", "listenPartyChat", y)

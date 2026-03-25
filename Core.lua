@@ -25,6 +25,7 @@ local defaults = {
     hudY = 0,
     hudPoint = "CENTER",
     whisperKeywords = { "water", "food", "mage" },
+    tradeHelperEnabled = true,
     foodStacksPerPerson = 1,
     waterStacksPerPerson = 2,
     autoReply = true,
@@ -64,10 +65,13 @@ function MageTools:InitDB()
                 MageToolsDB[k] = v
             end
         elseif type(v) == "table" and type(MageToolsDB[k]) == "table" then
-            -- Merge missing keys into existing table (e.g. new popupCategories entries)
-            for dk, dv in pairs(v) do
-                if MageToolsDB[k][dk] == nil then
-                    MageToolsDB[k][dk] = dv
+            -- Merge missing keys into existing dict-style tables (e.g. new popupCategories entries)
+            -- Skip array-style tables (e.g. whisperKeywords) — those are user-managed
+            if #v == 0 or type(next(v)) ~= "number" then
+                for dk, dv in pairs(v) do
+                    if MageToolsDB[k][dk] == nil then
+                        MageToolsDB[k][dk] = dv
+                    end
                 end
             end
         end
