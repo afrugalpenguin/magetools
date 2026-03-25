@@ -1,5 +1,9 @@
 # Changelog
 
+## v2.7.2
+- Fix whisper keywords reappearing after logout — deleted keywords now persist correctly
+- Add "Enable Trade Helper" toggle to disable whisper/party keyword detection and queue popup
+
 ## v2.7.1
 - Fix conjured food item IDs — Rank 6 (Conjured Sweet Roll) was not being counted, Ranks 5-8 had incorrect IDs/ordering
 

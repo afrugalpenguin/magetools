@@ -6,6 +6,15 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.7.2",
+        features = {
+            "Enable Trade Helper toggle — disable whisper/party keyword detection and the trade queue popup entirely",
+        },
+        fixes = {
+            "Whisper keywords now persist after logout — deleting 'water', 'food', 'mage' no longer reverts on login",
+        },
+    },
+    {
         version = "2.7.1",
         features = {},
         fixes = {
