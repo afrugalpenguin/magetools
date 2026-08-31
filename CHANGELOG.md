@@ -1,5 +1,10 @@
 # Changelog
 
+## v2.8.0
+- Add WoW Classic Era support - MageTools now loads and works on Era (1.15) as well as TBC Anniversary, from the same download
+- Fix Conjure Session Food and Water buttons doing nothing on Era
+- Fix HUD gem/food/water icons not appearing on Era when you have none of that item in your bags
+
 ## v2.7.2
 - Fix whisper keywords reappearing after logout — deleted keywords now persist correctly
 - Add "Enable Trade Helper" toggle to disable whisper/party keyword detection and queue popup

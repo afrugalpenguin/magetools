@@ -6,6 +6,16 @@ local whatsNewFrame = nil
 
 local changelog = {
     {
+        version = "2.8.0",
+        features = {
+            "WoW Classic Era support - MageTools now loads and works on Era (1.15) as well as TBC Anniversary, from the same download",
+        },
+        fixes = {
+            "Conjure Session Food and Water buttons now cast on Era",
+            "HUD gem/food/water icons now appear on Era when you have none of that item in your bags",
+        },
+    },
+    {
         version = "2.7.2",
         features = {
             "Enable Trade Helper toggle — disable whisper/party keyword detection and the trade queue popup entirely",
