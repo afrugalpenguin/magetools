@@ -122,9 +122,19 @@ function CM:CreateHUD()
         { type = "portalRune",   itemID = MT.RUNE_OF_PORTALS,       reagent = true },
     }
 
+    -- Item lists are ordered highest rank first and are supersets of the
+    -- vanilla set, so the top entry is a TBC item that has no icon on Era.
+    -- Walk down to the first one this client actually knows about.
+    local function ResolveDefaultItem(items)
+        for _, id in ipairs(items) do
+            if GetItemIcon(id) then return id end
+        end
+        return items[1]
+    end
+
     local visIndex = 0
     for _, cat in ipairs(categories) do
-        local defaultID = cat.itemID or cat.items[1]
+        local defaultID = cat.itemID or ResolveDefaultItem(cat.items)
         local btn = CreateFrame("Button", "MageToolsHUD" .. cat.type, hudFrame)
         btn:SetSize(btnSize, btnSize)
 
