@@ -1,0 +1,18 @@
+## Interface: 11507
+## Title: MageTools
+## Notes: Mage utility addon — portals, conjure tracking, trade helper
+## Author: FrugalPenguin
+## Version: @project-version@
+## SavedVariablesPerCharacter: MageToolsDB
+## OptionalDeps: Masque
+## X-Curse-Project-ID: 1459247
+
+Core.lua
+WhatsNew.lua
+Options.lua
+Tour.lua
+Data.lua
+MasqueHelper.lua
+PopupMenu.lua
+ConjureManager.lua
+TradeHelper.lua

@@ -73,9 +73,11 @@ MT.MANA_GEMS = {
     5514,  -- Mana Agate
 }
 
--- Conjure spell IDs (highest rank)
-MT.CONJURE_FOOD_SPELL = 33717  -- Conjure Food Rank 8
-MT.CONJURE_WATER_SPELL = 27090 -- Conjure Water Rank 9
+-- Conjure spell IDs. Cast attributes are set by spell NAME, which selects the
+-- highest known rank, so these only need to resolve to the right name. Rank 1
+-- is used because higher ranks are absent from the Era client's spell data.
+MT.CONJURE_FOOD_SPELL = 587    -- Conjure Food (Rank 1 anchor; exists on Era and TBC)
+MT.CONJURE_WATER_SPELL = 5504  -- Conjure Water (Rank 1 anchor; exists on Era and TBC)
 MT.CONJURE_GEM_SPELL = 27101   -- Conjure Mana Emerald
 
 -- Reagent item IDs
